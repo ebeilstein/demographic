@@ -1,0 +1,2231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Employee Payroll Setup — City of La Verne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0F2A43;
+    --navy-2:#173B5E;
+    --paper:#F6F4EE;
+    --card:#FFFFFF;
+    --ink:#1E2530;
+    --muted:#5B6472;
+    --border:#E2DED2;
+    --border-2:#D7D2C3;
+    --brass:#A9762E;
+    --brass-dark:#8A5F22;
+    --teal:#2E5D52;
+    --teal-bg:#E7EFEC;
+    --amber-bg:#FBF0DE;
+    --red:#B0392F;
+    --red-bg:#FBEAE7;
+    --focus:#1B6FB8;
+    --radius:10px;
+    --serif:'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --sans:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){
+      --paper:#14181F; --card:#1B212B; --ink:#EAEAE6; --muted:#9BA3AE;
+      --border:#2B323D; --border-2:#333B47; --teal-bg:#173029; --amber-bg:#2E2413; --red-bg:#331C19;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14181F; --card:#1B212B; --ink:#EAEAE6; --muted:#9BA3AE;
+    --border:#2B323D; --border-2:#333B47; --teal-bg:#173029; --amber-bg:#2E2413; --red-bg:#331C19;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]) .sidenav li.active button{ color:#F2E4CB; }
+  }
+  :root[data-theme="dark"] .sidenav li.active button{ color:#F2E4CB; }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans);
+    font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0; color:var(--ink);}
+  a{color:var(--focus);}
+  button{font-family:var(--sans); cursor:pointer;}
+  input,select,textarea{font-family:var(--sans); font-size:14.5px; color:var(--ink);}
+  ::selection{background:#c9d9e6;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    background:var(--navy); color:#fff; padding:14px 22px;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    border-bottom:3px solid var(--brass);
+  }
+  .topbar .seal{
+    width:34px;height:34px;border-radius:50%;background:var(--brass);
+    display:flex;align-items:center;justify-content:center;font-family:var(--serif);
+    font-weight:700; color:var(--navy); flex:none; font-size:15px;
+  }
+  .topbar .titles{flex:1; min-width:200px;}
+  .topbar .titles .city{font-size:12px; letter-spacing:.02em; color:#C9D3DE; margin-bottom:1px;}
+  .topbar .titles h1{font-size:18px; color:#fff;}
+  .tabs{display:flex; gap:4px; background:rgba(255,255,255,.08); padding:4px; border-radius:9px;}
+  .tabs button{
+    background:transparent; border:none; color:#D9E1EA; padding:8px 16px; border-radius:6px;
+    font-size:13.5px; font-weight:600; transition:background .15s, color .15s;
+  }
+  .tabs button.active{background:#fff; color:var(--navy);}
+  .tabs button .badge{
+    display:inline-block; margin-left:6px; background:var(--brass); color:#fff; border-radius:20px;
+    padding:0 7px; font-size:11px; line-height:16px; min-width:16px;
+  }
+
+  /* ---------- layout ---------- */
+  .app{display:flex; min-height:calc(100vh - 66px); max-width:1180px; margin:0 auto;}
+  .sidenav{
+    width:250px; flex:none; padding:24px 14px 24px 22px; position:sticky; top:0;
+    align-self:flex-start; max-height:100vh; overflow-y:auto;
+  }
+  .sidenav ol{list-style:none; margin:0; padding:0; border-left:2px solid var(--border);}
+  .sidenav li{position:relative; margin:0;}
+  .sidenav button{
+    display:block; width:100%; text-align:left; background:none; border:none; padding:9px 0 9px 18px;
+    font-size:13.5px; color:var(--muted); position:relative;
+  }
+  .sidenav button:hover{color:var(--ink);}
+  .sidenav li.active button{color:var(--navy); font-weight:600;}
+  :root[data-theme="dark"] .sidenav li.active button, body.dark .sidenav li.active button{color:#fff;}
+  .sidenav li .dot{
+    position:absolute; left:-7px; top:12px; width:12px; height:12px; border-radius:50%;
+    background:var(--card); border:2px solid var(--border-2);
+  }
+  .sidenav li.active .dot{border-color:var(--brass); background:var(--brass);}
+  .sidenav li.done .dot{border-color:var(--teal); background:var(--teal);}
+  .sidenav .progress-label{font-size:11.5px; color:var(--muted); padding:0 0 10px 2px; text-transform:uppercase; letter-spacing:.06em;}
+
+  main{flex:1; min-width:0; padding:26px 26px 80px;}
+  .section-card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:24px 26px; margin-bottom:20px;
+  }
+  .section-card h2{font-size:19px; margin-bottom:3px;}
+  .section-card .section-desc{color:var(--muted); font-size:13.5px; margin-bottom:18px; max-width:62ch;}
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px 18px;}
+  .grid.cols-3{grid-template-columns:repeat(3,1fr);}
+  .field{display:flex; flex-direction:column; gap:5px; min-width:0;}
+  .field.span-2{grid-column:span 2;}
+  .field label{font-size:12.5px; font-weight:600; color:var(--ink); display:flex; gap:5px; align-items:baseline;}
+  .field label .req{color:var(--red); font-weight:700;}
+  .field .hint{font-size:11.5px; color:var(--muted); margin-top:1px;}
+  .field input, .field select, .field textarea{
+    border:1px solid var(--border-2); border-radius:7px; padding:8px 10px; background:var(--card); color:var(--ink);
+    width:100%;
+  }
+  .field textarea{resize:vertical; min-height:60px; font-size:14px;}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:2px solid var(--focus); outline-offset:1px; border-color:var(--focus);
+  }
+  .field input.err, .field select.err{border-color:var(--red); background:var(--red-bg);}
+  .field .errmsg{font-size:11.5px; color:var(--red); display:none;}
+  .field.invalid .errmsg{display:block;}
+  .radiorow{display:flex; gap:16px; padding-top:4px;}
+  .radiorow label{display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:500; color:var(--ink);}
+  .radiorow input{width:auto;}
+
+  fieldset{border:none; padding:0; margin:0;}
+  legend{padding:0;}
+
+  .subhead{font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--brass-dark); font-weight:700; margin:22px 0 10px; padding-top:14px; border-top:1px solid var(--border);}
+  .subhead:first-child{margin-top:0; padding-top:0; border-top:none;}
+
+  /* checkbox groups */
+  .check-groups{display:flex; flex-direction:column; gap:14px;}
+  .check-group-title{font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:6px;}
+  .check-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:6px 16px;}
+  .checkitem{display:flex; align-items:flex-start; gap:8px; font-size:13.5px; padding:4px 0;}
+  .checkitem input{margin-top:3px; width:auto; flex:none;}
+  .checkitem .flag{color:var(--brass-dark); font-weight:700;}
+
+  .warnbox{
+    background:var(--amber-bg); border:1px solid #E3C58A; border-radius:8px; padding:10px 13px;
+    font-size:12.5px; color:var(--brass-dark); margin-bottom:14px; display:flex; gap:8px;
+  }
+  :root[data-theme="dark"] .warnbox{color:#E3B96B;}
+  .warnbox b{color:inherit;}
+
+  /* cascade widgets */
+  .cascade{display:grid; grid-template-columns:1fr 1fr; gap:10px 14px;}
+  .cascade-result{
+    grid-column:1/-1; font-size:12.5px; padding:8px 11px; border-radius:7px; background:var(--paper);
+    border:1px dashed var(--border-2); color:var(--muted);
+  }
+  .cascade-result b{color:var(--ink); font-family:ui-monospace,monospace;}
+
+  /* repeatable rows (percent distribution, relationships, bank accounts) */
+  .repeat-row{
+    display:grid; grid-template-columns:1fr 100px 34px; gap:10px; align-items:end; margin-bottom:8px;
+  }
+  .repeat-row.rel-row{grid-template-columns:1.3fr 1fr 1fr 34px;}
+  .repeat-row.bank-row{grid-template-columns:1.4fr 1fr 1fr .8fr 34px;}
+  .rowbtn{
+    width:34px;height:34px;border-radius:7px;border:1px solid var(--border-2); background:var(--card);
+    color:var(--muted); font-size:16px; line-height:1;
+  }
+  .rowbtn:hover{border-color:var(--red); color:var(--red);}
+  .addrow-btn{
+    border:1px dashed var(--border-2); background:none; color:var(--brass-dark); font-weight:600; font-size:13px;
+    padding:8px 14px; border-radius:7px; margin-top:4px;
+  }
+  .addrow-btn:hover{border-color:var(--brass-dark); background:var(--amber-bg);}
+  .sum-indicator{font-size:12px; margin-top:8px; padding:6px 10px; border-radius:6px; display:inline-block;}
+  .sum-indicator.ok{background:var(--teal-bg); color:var(--teal);}
+  .sum-indicator.bad{background:var(--red-bg); color:var(--red);}
+
+  /* buttons */
+  .btn{border-radius:8px; border:1px solid var(--border-2); background:var(--card); color:var(--ink); padding:10px 18px; font-size:13.5px; font-weight:600;}
+  .btn:hover{border-color:var(--navy);}
+  .btn-primary{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .btn-primary:hover{background:var(--navy-2);}
+  .btn-brass{background:var(--brass); border-color:var(--brass); color:#fff;}
+  .btn-brass:hover{background:var(--brass-dark);}
+  .btn-ghost{background:none; border:none; color:var(--muted); text-decoration:underline;}
+  .btn:disabled{opacity:.45; cursor:not-allowed;}
+  .btnbar{display:flex; justify-content:space-between; align-items:center; margin-top:8px; gap:10px; flex-wrap:wrap;}
+  .btnbar .right{display:flex; gap:10px; flex-wrap:wrap;}
+
+  /* reference tables (collapsible, read-only) */
+  details.refbox{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:20px;}
+  details.refbox summary{padding:16px 22px; font-family:var(--serif); font-weight:600; font-size:15.5px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;}
+  details.refbox summary::-webkit-details-marker{display:none;}
+  details.refbox summary .chev{transition:transform .15s; color:var(--muted); font-size:13px;}
+  details.refbox[open] summary .chev{transform:rotate(90deg);}
+  .refbox .refbody{padding:0 22px 20px;}
+  .refbox input[type=search]{width:100%; padding:8px 10px; border:1px solid var(--border-2); border-radius:7px; margin-bottom:12px;}
+  table.reftable{width:100%; border-collapse:collapse; font-size:13px;}
+  table.reftable th{text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:6px 8px; border-bottom:1px solid var(--border-2);}
+  table.reftable td{padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:top;}
+  table.reftable tr:hover td{background:var(--paper);}
+  table.reftable td.code{font-family:ui-monospace,monospace; font-weight:600; color:var(--brass-dark); white-space:nowrap;}
+  .ref-group-row td{font-weight:700; background:var(--paper); padding-top:12px;}
+
+  /* review page */
+  .review-section{margin-bottom:18px;}
+  .review-section h3{font-size:14px; color:var(--brass-dark); margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--border);}
+  .review-grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 24px;}
+  .review-item{display:flex; justify-content:space-between; gap:10px; font-size:13.5px; padding:3px 0; border-bottom:1px dotted var(--border);}
+  .review-item .k{color:var(--muted);}
+  .review-item .v{font-weight:600; text-align:right;}
+  .review-item.empty .v{color:var(--muted); font-weight:400; font-style:italic;}
+  .missing-banner{background:var(--red-bg); border:1px solid #E3B4AC; color:var(--red); padding:12px 16px; border-radius:8px; font-size:13.5px; margin-bottom:16px;}
+  .missing-banner ul{margin:6px 0 0; padding-left:18px;}
+  .missing-banner a{color:var(--red); font-weight:600;}
+
+  /* queue */
+  .queue-toolbar{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; align-items:center;}
+  .queue-toolbar input[type=search]{flex:1; min-width:180px; padding:9px 12px; border:1px solid var(--border-2); border-radius:8px;}
+  .queue-toolbar select{padding:9px 10px; border:1px solid var(--border-2); border-radius:8px;}
+  .queue-item{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); margin-bottom:10px; overflow:hidden;}
+  .queue-item .qhead{display:flex; align-items:center; gap:12px; padding:14px 18px; cursor:pointer;}
+  .queue-item .qhead:hover{background:var(--paper);}
+  .queue-item .qname{font-weight:700; font-size:14.5px;}
+  .queue-item .qmeta{font-size:12px; color:var(--muted);}
+  .status-pill{font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; text-transform:uppercase; letter-spacing:.03em;}
+  .status-pill.pending{background:var(--amber-bg); color:var(--brass-dark);}
+  .status-pill.processed{background:var(--teal-bg); color:var(--teal);}
+  .qspacer{flex:1;}
+  .qbody{padding:0 18px 18px; display:none; border-top:1px solid var(--border);}
+  .queue-item.open .qbody{display:block; padding-top:14px;}
+  .empty-state{text-align:center; padding:60px 20px; color:var(--muted);}
+  .empty-state .big{font-size:34px; margin-bottom:10px;}
+
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(8px); opacity:0;
+    background:var(--navy); color:#fff; padding:11px 20px; border-radius:8px; font-size:13.5px;
+    transition:opacity .2s, transform .2s; pointer-events:none; z-index:50; box-shadow:0 6px 18px rgba(0,0,0,.2);
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .step-wrap{display:none;}
+  .step-wrap.active{display:block;}
+
+  /* ---------- printable PDF export ---------- */
+  #printArea{display:none;}
+  .pp-page{font-family:var(--sans); color:#1a1a1a; max-width:7.5in; margin:0 auto; padding:0.4in 0;}
+  .pp-header{border-bottom:3px solid #A9762E; padding-bottom:10px; margin-bottom:18px;}
+  .pp-header h1{font-family:var(--serif); font-size:19px; color:#0F2A43; margin:0 0 4px;}
+  .pp-header .pp-meta{font-size:12px; color:#444;}
+  .pp-section{margin-bottom:16px; break-inside:avoid; page-break-inside:avoid;}
+  .pp-section h2{font-family:var(--serif); font-size:13px; color:#8A5F22; text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid #ccc; padding-bottom:4px; margin:0 0 8px;}
+  .pp-grid{display:grid; grid-template-columns:1fr 1fr; gap:3px 22px;}
+  .pp-item{display:flex; justify-content:space-between; gap:10px; font-size:11.5px; padding:2px 0; border-bottom:1px dotted #ddd;}
+  .pp-item .pp-k{color:#555;}
+  .pp-item .pp-v{font-weight:600; text-align:right; color:#111;}
+  .pp-item.pp-empty .pp-v{color:#999; font-weight:400; font-style:italic;}
+  @media print{
+    body > *:not(#printArea){ display:none !important; }
+    #printArea{ display:block !important; }
+    @page{ margin:0.5in; size:letter; }
+    .pp-grid{ grid-template-columns:1fr 1fr; }
+  }
+
+  @media (max-width: 900px){
+    .app{flex-direction:column;}
+    .sidenav{
+      width:100%; position:static; padding:12px 16px 0; overflow-x:auto;
+    }
+    .sidenav ol{display:flex; border-left:none; border-bottom:2px solid var(--border); gap:2px;}
+    .sidenav li{flex:none;}
+    .sidenav button{padding:8px 12px; white-space:nowrap;}
+    .sidenav li .dot{display:none;}
+    main{padding:18px 16px 60px;}
+    .grid, .grid.cols-3{grid-template-columns:1fr;}
+    .field.span-2{grid-column:span 1;}
+    .review-grid{grid-template-columns:1fr;}
+    .cascade{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="seal">LV</div>
+  <div class="titles">
+    <div class="city">City of La Verne · Human Resources → Payroll</div>
+    <h1>New Employee Payroll Setup</h1>
+  </div>
+</div>
+
+<div id="formView"></div>
+
+<div class="toast" id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+/* =========================================================================
+   CODE TABLES
+   Transcribed from "Admin 03.07.24" tab of the legacy worksheet.
+   Where the source data contained internal inconsistencies (the same code
+   used for two different meanings, or a legend visibly shifted by a row),
+   it is noted with a WARN flag rendered in the UI rather than silently
+   "corrected" — Payroll should confirm the intended code.
+   ========================================================================= */
+
+const CODES = {
+  usStates: [
+    {v:'AL',l:'Alabama'}, {v:'AK',l:'Alaska'}, {v:'AZ',l:'Arizona'}, {v:'AR',l:'Arkansas'},
+    {v:'CA',l:'California'}, {v:'CO',l:'Colorado'}, {v:'CT',l:'Connecticut'}, {v:'DE',l:'Delaware'},
+    {v:'DC',l:'District of Columbia'}, {v:'FL',l:'Florida'}, {v:'GA',l:'Georgia'}, {v:'HI',l:'Hawaii'},
+    {v:'ID',l:'Idaho'}, {v:'IL',l:'Illinois'}, {v:'IN',l:'Indiana'}, {v:'IA',l:'Iowa'},
+    {v:'KS',l:'Kansas'}, {v:'KY',l:'Kentucky'}, {v:'LA',l:'Louisiana'}, {v:'ME',l:'Maine'},
+    {v:'MD',l:'Maryland'}, {v:'MA',l:'Massachusetts'}, {v:'MI',l:'Michigan'}, {v:'MN',l:'Minnesota'},
+    {v:'MS',l:'Mississippi'}, {v:'MO',l:'Missouri'}, {v:'MT',l:'Montana'}, {v:'NE',l:'Nebraska'},
+    {v:'NV',l:'Nevada'}, {v:'NH',l:'New Hampshire'}, {v:'NJ',l:'New Jersey'}, {v:'NM',l:'New Mexico'},
+    {v:'NY',l:'New York'}, {v:'NC',l:'North Carolina'}, {v:'ND',l:'North Dakota'}, {v:'OH',l:'Ohio'},
+    {v:'OK',l:'Oklahoma'}, {v:'OR',l:'Oregon'}, {v:'PA',l:'Pennsylvania'}, {v:'RI',l:'Rhode Island'},
+    {v:'SC',l:'South Carolina'}, {v:'SD',l:'South Dakota'}, {v:'TN',l:'Tennessee'}, {v:'TX',l:'Texas'},
+    {v:'UT',l:'Utah'}, {v:'VT',l:'Vermont'}, {v:'VA',l:'Virginia'}, {v:'WA',l:'Washington'},
+    {v:'WV',l:'West Virginia'}, {v:'WI',l:'Wisconsin'}, {v:'WY',l:'Wyoming'},
+  ],
+
+  hoursWorkedPerYear: [
+    {v:'1456',l:'1,456 \u2014 Part-Time'}, {v:'1872',l:'1,872 \u2014 36-hour schedule'},
+    {v:'2080',l:'2,080 \u2014 40-hour schedule'}, {v:'2912',l:'2,912 \u2014 56-hour (Fire shift) schedule'},
+  ],
+
+  sex: [ {v:'F',l:'Female'}, {v:'M',l:'Male'} ],
+
+  maritalStatusPersonal: [
+    {v:'D',l:'Divorced'}, {v:'M',l:'Married'}, {v:'S',l:'Single'},
+    {v:'W',l:'Widow/Widower'}, {v:'U',l:'Unknown'}
+  ],
+
+  confidential: [ {v:'Y',l:'Yes — flag as confidential'}, {v:'N',l:'No'} ],
+
+  employeeStatus: [
+    {v:'RP',l:'RP — Regular Part-Time'}, {v:'PT',l:'PT — Part Time'},
+    {v:'FT',l:'FT — Permanent Full-Time'}, {v:'PF',l:'PF — Probationary Full-Time'},
+    {v:'SS',l:'SS — Seasonal'}, {v:'TM',l:'TM — Temporary Appt'}
+  ],
+
+  fullPartTime: [ {v:'FT',l:'Full-Time'}, {v:'PT',l:'Part-Time'} ],
+
+  payFrequency: [ {v:'BW',l:'BW — Bi-Weekly'} ],
+
+  scheduledHours: [
+    {v:'FA',l:'FA — Fire A Shift'}, {v:'FB',l:'FB — Fire B Shift'}, {v:'FC',l:'FC — Fire C Shift'},
+    {v:'NS',l:'NS — No Schedule'}, {v:'PD',l:'PD — Police 80 hour schedule'},
+    {v:'W3',l:'W3 — 20 Hr part-time'}, {v:'W4',l:'W4 — 32 Hr part-time'},
+    {v:'W1',l:'W1 — 36 Hr Mon–Thur'}, {v:'W5',l:'W5 — 36 Hr Mon–Thur (Yard)'},
+    {v:'W2',l:'W2 — 40 Hr Mon–Fri'}, {v:'W6',l:'W6 — 40 Hr Mon–Thurs'}, {v:'W7',l:'W7 — 28 Hr Mon–Thurs'}
+  ],
+
+  hourlySalaried: [ {v:'H',l:'Hourly'}, {v:'S',l:'Salaried'} ],
+  yesNo: [ {v:'Y',l:'Yes'}, {v:'N',l:'No'} ],
+
+  workersComp: [
+    {v:'4',l:'Clerical'}, {v:'2',l:'Firefighters'}, {v:'5',l:'Maintenance Workers'},
+    {v:'7',l:'Non Manual'}, {v:'8',l:'Reserve Firefighters'}, {v:'9',l:'Reserve Police Officers'},
+    {v:'3',l:'Sworn Police'}
+  ],
+
+  eeoFunction: [
+    {v:'10',l:'Community Development'}, {v:'1',l:'Financial Administration'}, {v:'5',l:'Fire Protection'},
+    {v:'15',l:'Other'}, {v:'6',l:'Parks & Recreation'}, {v:'4',l:'Police Protection'},
+    {v:'13',l:'Sanitation & Sewage'}, {v:'2',l:'Streets & Highways'}, {v:'12',l:'Utilities/Transportation'}
+  ],
+
+  eeoCategory: [
+    {v:'6',l:'Office and Clerical'}, {v:'1',l:'Officials/Administrators'}, {v:'5',l:'Para-Prof Non-Sworn'},
+    {v:'2',l:'Professionals'}, {v:'4',l:'Protective Svc-Sworn'}, {v:'8',l:'Service Maintenance'},
+    {v:'7',l:'Skilled Crafts'}, {v:'3',l:'Technicians'}
+  ],
+
+  groupPlan: [
+    {v:'AO',l:'Ambulance Operator'}, {v:'CC',l:'City Council'}, {v:'DH',l:'Department Heads'},
+    {v:'FM',l:'Fire Mid Management'}, {v:'FS',l:'Fire Shift LVFA'}, {v:'LA',l:'LA Impact'},
+    {v:'MM',l:'Mid-Management'}, {v:'MS',l:'Misc./General Unit'}, {v:'PT',l:'Part-Time Employees'},
+    {v:'PL',l:'Police Lts./Mid-Mgt.'}, {v:'PD',l:'Police/LVPOA'}, {v:'RS',l:'Reserves'}
+  ],
+
+  retirementPlan: [
+    {v:'PE',l:'PERS Employee Pd'}, {v:'PF',l:'PERS Fire'}, {v:'PB',l:'PERS Fire Battalion Chiefs'},
+    {v:'PH',l:'PERS Fire PEPRA'}, {v:'PD',l:'PERS Mid-Mgmt/Dept Hds'}, {v:'PA',l:'PERS Misc >2011'},
+    {v:'PM',l:'PERS Misc'}, {v:'PI',l:'PERS Misc PEPRA'}, {v:'PP',l:'PERS Police'},
+    {v:'PG',l:'PERS Police PEPRA'}, {v:'PL2',l:'PERS Police M/M', code:'PL'}, {v:'PC',l:'PERS Safety >2011'},
+    {v:'R',l:'Retired Working P/T'}
+  ],
+
+  reviewType: [
+    {v:'12',l:'Annual Review'}, {v:'6',l:'Six Month Review'}, {v:'18',l:'18 Month Probation'}
+  ],
+
+  ethnicCode: [
+    {v:'G',l:'American Indian/Alaskan Native'}, {v:'E',l:'Asian'}, {v:'D',l:'Black'},
+    {v:'A',l:'Hispanic or Latino'}, {v:'F',l:'Native Hawaiian/Pacific Islander'},
+    {v:'H',l:'Two or more Races'}, {v:'C',l:'White'}
+  ],
+
+  education: [
+    {v:'HSG',l:'High School / GED'}, {v:'ASC',l:'Associate\u2019s Degree'}, {v:'BAC',l:'Bachelor\u2019s Degree'},
+    {v:'MST',l:'Master\u2019s Degree'}, {v:'PHD',l:'Ph.D.'}
+  ],
+
+  licenseType: [
+    {v:'A',l:'Class A'}, {v:'B',l:'Class B'}, {v:'C',l:'Class C'}, {v:'M',l:'Class M'}
+  ],
+
+  drugPool: [ {v:'A',l:'Pool A'}, {v:'B',l:'Pool B'} ],
+
+  // Correct, row-aligned relationship list (from the Emergency Contact
+  // legend). A second copy of this legend appears later in the workbook
+  // (near "Employee Relationships") shifted by one row, pairing each name
+  // with the WRONG code — that copy is not used here. See build notes.
+  relationship: [
+    {v:'AU',l:'Aunt'}, {v:'BR',l:'Brother'}, {v:'BI',l:'Brother-in-law'}, {v:'CO',l:'Cousin'},
+    {v:'DA',l:'Daughter'}, {v:'DI',l:'Daughter-in-law'}, {v:'FA',l:'Father'}, {v:'FI',l:'Father-in-law'},
+    {v:'FS',l:'Former Spouse'}, {v:'FR',l:'Friend'}, {v:'GD',l:'Granddaughter'}, {v:'GF',l:'Grandfather'},
+    {v:'GM',l:'Grandmother'}, {v:'GS',l:'Grandson'}, {v:'GU',l:'Guardian'}, {v:'MO',l:'Mother'},
+    {v:'MI',l:'Mother-in-law'}, {v:'NE',l:'Nephew'}, {v:'NI',l:'Niece'}, {v:'OT',l:'Other'},
+    {v:'ST',l:'Sister'}, {v:'SI',l:'Sister-in-law'}, {v:'SN',l:'Son'}, {v:'SO',l:'Son-in-law'},
+    {v:'SP',l:'Spouse'}, {v:'SD',l:'Step-daughter'}, {v:'SF',l:'Step-Father'}, {v:'SM',l:'Step-Mother'},
+    {v:'SS',l:'Step-Son'}, {v:'UN',l:'Uncle'}
+  ],
+
+  compTime: [
+    {v:'FD',l:'Fire Comp'}, {v:'MC',l:'Misc Comp'}, {v:'P2',l:'Police Comp / Non-Sworn'},
+    {v:'P1',l:'Police Comp / Sworn'}, {v:'P3',l:'Police Mid-Mngmt'}
+  ],
+
+  sickLeave: [
+    {v:'11',l:'11.2 Hrs / Fire Shift'}, {v:'6',l:'8.0 Hrs / Mgt-Mid-Misc'}, {v:'67',l:'8.0 Hrs / Police-LVPOA'},
+    {v:'15',l:'8.0 Hrs / Amb Operator W/Cap'}, {v:'8',l:'8.0 Hrs / Fire Non-Shift'},
+    {v:'PT',l:'Part-Time — 1 hr per 30 hrs worked'}
+  ],
+
+  stateMaritalStatus: [
+    {v:'H',l:'Head of Household'}, {v:'M',l:'Married'}, {v:'S',l:'Single'}
+  ],
+
+  federalFilingStatus: [
+    {v:'M',l:'Married Filing Jointly (or Qualifying Surviving Spouse)'},
+    {v:'S',l:'Single or Married Filing Separately'},
+    {v:'H',l:'Head of Household'}
+  ],
+
+  deduction: [
+    {v:'GR',l:'A C Newman Life'}, {v:'FI',l:'Fire Preretire / 2 Death'}, {v:'GF',l:'Fidelity Scholarshare'},
+    {v:'VL',l:'Standard Addl Vol Life'}, {v:'ST',l:'Hartford Life Ins — Fire Dep.'},
+    {v:'BS',l:'Hartford Life Ins — Misc'}, {v:'EF',l:'La Verne Employee Fund'}, {v:'UF',l:'LVFA Dues'},
+    {v:'UP',l:'LVPOA Dues'}, {v:'UW',l:'United Way'}, {v:'FE',l:'125 Admin Fee'}
+  ],
+};
+
+// Additional Pay — grouped for a checkbox picker (an employee may receive
+// more than one). Source: Additional Pay code export provided by HR/Payroll.
+// Rows marked "Inactive" in that export are excluded. Amounts are flat
+// dollar amounts; percentages are of base pay, per the export's own labels.
+const ADD_PAY_GROUPS = [
+  { g:'Allowances', items:[ {v:'AA',l:'Auto Allowance'} ] },
+  { g:'Bilingual Pay', items:[
+    {v:'BA',l:'Bilingual Pay — A.O.',amt:25}, {v:'BI',l:'Bilingual Pay — CEA',amt:75},
+    {v:'BG',l:'Bilingual Pay — Fire',amt:37.5}, {v:'BM',l:'Bilingual Pay — MM/Mgmt',amt:100},
+    {v:'BP',l:'Bilingual Pay — Part-Time',amt:15}, {v:'BB',l:'Bilingual Pay — PDMMA',amt:37.5},
+    {v:'BL',l:'Bilingual Pay — POA',amt:75},
+  ]},
+  { g:'Canine Assignment', items:[
+    {v:'K9',l:'Canine Assignment Pay'}, {v:'KR',l:'Canine Assignment Retro'},
+  ]},
+  { g:'Fire Officer & Specialty Programs', items:[
+    {v:'CH',l:'Chief Officer Program',amt:1750}, {v:'CI',l:'CICCS Qualification Program',amt:1000},
+    {v:'CO',l:'Company Officer Program',amt:1500}, {v:'DO',l:'Driver Operator Program',amt:600},
+  ]},
+  { g:'Performance & Merit Pay', items:[
+    {v:'EX',l:'Excellent Performance',pct:5}, {v:'EP',l:'Excellent Performance — MM/DH',pct:5},
+    {v:'ER',l:'Excellent Performance — PEPRA',pct:5}, {v:'ES',l:'Excellent Performance Retro — PEPRA'},
+    {v:'XP',l:'Excellent Performance Retro'}, {v:'EA',l:'Employee Achievement Award'}, {v:'MB',l:'Merger Bonus',pct:5},
+  ]},
+  { g:'Holiday Pay', items:[
+    {v:'HP',l:'Holiday Pay — Shift'}, {v:'HR',l:'Holiday Pay — Shift Retro'}, {v:'HB',l:'Holiday Payback'},
+  ]},
+  { g:'Marksmanship', items:[
+    {v:'M1',l:'Marksmanship — Expert',amt:50}, {v:'M5',l:'Marksmanship — Distinguished Expert',amt:62.5},
+    {v:'MS',l:'Marksmanship — Sharpshooter',amt:25},
+  ]},
+  { g:'Medical in Lieu', items:[
+    {v:'MD',l:'Medical in Lieu'},
+  ]},
+  { g:'POA Longevity', items:[
+    {v:'ML',l:'PMMA Longevity, 20+ Years',amt:3600},
+    {v:'L7',l:'POA Longevity, 10–14 Years',amt:1200}, {v:'L8',l:'POA Longevity, 15–19 Years',amt:2400},
+    {v:'L9',l:'POA Longevity, 20+ Years',amt:3600},
+  ]},
+  { g:'POA Education / Certification', items:[
+    {v:'MA',l:'PMMA — Education, Masters',amt:325}, {v:'E5',l:'POA Incentive Pay'},
+    {v:'P1',l:'POA 5% Intermediate Post',pct:5}, {v:'P5',l:'POA 5% Bachelors',pct:5},
+    {v:'P4',l:'POA 1% AA/AS'},
+    {v:'P2',l:'POA 10% Advanced Post',pct:10}, {v:'P6',l:'POA 10% Masters',pct:10},
+    {v:'P3',l:'POA 12% Supervisory Post',pct:12},
+  ]},
+  { g:'Lead / Special Assignment Stipends', items:[
+    {v:'LD',l:'Lead Dispatch',pct:5}, {v:'LM',l:'Lead Motor Officer Differential',amt:46.15},
+    {v:'SW',l:'Special Project Stipend'},
+    {v:'SS',l:'Special Assignment Stipend — DDP',amt:115.38}, {v:'SG',l:'Special Assignment Stipend — FSET',amt:57.7},
+    {v:'S9',l:'Special Assignment Stipend — K9',amt:115.38}, {v:'SM',l:'Special Assignment Stipend — Motor',amt:115.38},
+    {v:'SR',l:'Special Assignment Stipend — SRO',amt:115.38},
+    {v:'SF',l:'Special Assignment — Arson',amt:80.77}, {v:'SH',l:'Special Assignment — Hazmat',amt:80.77},
+    {v:'SP',l:'Special Assignment — PPE',amt:80.77}, {v:'SU',l:'Special Assignment — SCBA',amt:80.77},
+    {v:'ST',l:'Special Assignment — Telestaff',amt:80.77}, {v:'SV',l:'Special Assignment — USAR',amt:80.77},
+  ]},
+  { g:'Uniform Allowance', items:[
+    {v:'UP',l:'Uniform — Police Sworn',amt:1000}, {v:'UM',l:'Uniform — Police Clerical',amt:650},
+    {v:'UC',l:'Uniform — Comm Officers',amt:650}, {v:'U4',l:'Uniform — Comm Officers PEPRA',amt:650},
+    {v:'UG',l:'Uniform — PD Mid-Mgmt',amt:1020}, {v:'UA',l:'Uniform — Police Captain',amt:600},
+    {v:'UW',l:'Uniform — Mid-Mgmt',amt:600}, {v:'U5',l:'Uniform — Mid-Mgmt PEPRA',amt:600},
+    {v:'UF',l:'Uniform — Fire',amt:600}, {v:'UN',l:'Uniform — Fire Mid-Mgmt',amt:600},
+    {v:'US',l:'Uniform — Fire Mid-Mgmt PEPRA',amt:600}, {v:'U2',l:'Uniform — Fire PEPRA',amt:600},
+    {v:'U1',l:'Uniform — Police PEPRA',amt:1000}, {v:'U3',l:'Uniform — CEA PEPRA',amt:650},
+    {v:'PU',l:'Uniform Payout'},
+  ]},
+  { g:'Education / Certification Pay', items:[
+    {v:'C1',l:'1.25% Education',pct:1.25}, {v:'A1',l:'2.50% Education',pct:2.5}, {v:'A2',l:'2.5% Education — Additional',pct:2.5},
+    {v:'A4',l:'2.5% Certification',pct:2.5},
+    {v:'D1',l:'2.5% D1 Certificate',pct:2.5}, {v:'D2',l:'2.5% D2 Certificate',pct:2.5}, {v:'D3',l:'2.5% D3 Certificate',pct:2.5},
+    {v:'D4',l:'2.5% D4 Certificate',pct:2.5}, {v:'D5',l:'2.5% D5 Certificate',pct:2.5},
+    {v:'T0',l:'2.5% T1 Certificate',pct:2.5}, {v:'T2',l:'2.5% T2 Certificate',pct:2.5}, {v:'T3',l:'2.5% T3 Certificate',pct:2.5},
+    {v:'T4',l:'2.5% T4 Certificate',pct:2.5}, {v:'T5',l:'2.5% T5 Certificate',pct:2.5},
+    {v:'PP',l:'2.5% Paramedic Certificate',pct:2.5},
+    {v:'B1',l:'5% Education',pct:5}, {v:'T1',l:'5.0% Training Pay',pct:5}, {v:'A3',l:'5.0% Certification Pay',pct:5},
+    {v:'AC',l:'5.0% Temporary Upgrade Pay',pct:5}, {v:'AQ',l:'5.0% Acting Pay',pct:5}, {v:'AP',l:'5.0% Acting Pay — Non-PERSable',pct:5},
+    {v:'W1',l:'5% D2 Certificate',pct:5}, {v:'W2',l:'5% D3 Certificate',pct:5},
+    {v:'W3',l:'5% D2 & T2 Certificate',pct:5}, {v:'W4',l:'5% D3 & T3 Certificate',pct:5},
+    {v:'E1',l:'6.25% Education',pct:6.25}, {v:'F1',l:'7.50% Education',pct:7.5},
+    {v:'F6',l:'10% Education',pct:10}, {v:'G1',l:'10% Education/Training',pct:10},
+  ]},
+  { g:'Retroactive Pay Adjustments', items:[
+    {v:'RT',l:'Retro Assignment Pay Adjustment'}, {v:'RA',l:'Retro Bilingual Pay'},
+    {v:'RE',l:'Retro Education Pay'},
+    {v:'RM',l:'Retro Marksmanship Pay'}, {v:'RP',l:'Retro Post Add Pay'},
+    {v:'RS',l:'Retro Standby Pay'},
+  ]},
+];
+
+// Vacation balance code — cascading picker (bargaining group -> years of service)
+const VACATION_GROUPS = [
+  { g:'Ambulance Operator (W/Cap)', tiers:[['0–4 yrs','AA'],['5 yrs','AB'],['6 yrs','AC'],['7 yrs','AD'],['8 yrs','AE'],['9 yrs','AF'],['10 yrs','AG'],['11 yrs','AH'],['12 yrs','AI'],['13 yrs','AJ'],['14 yrs','AK'],['15+ yrs','AL']] },
+  { g:'Communications Officer', tiers:[['0–4 yrs','CA'],['5 yrs','CB'],['6 yrs','CC'],['7 yrs','CD'],['8 yrs','CE'],['9 yrs','CF'],['10 yrs','CG'],['11 yrs','CH'],['12 yrs','CI'],['13 yrs','CJ'],['14 yrs','CK'],['15+ yrs','CL']] },
+  { g:'Communications Officer (W/Cap)', tiers:[['0–4 yrs','CM'],['5 yrs','CN'],['6 yrs','CO'],['7 yrs','CP'],['8 yrs','CQ'],['9 yrs','CR'],['10 yrs','CS'],['11 yrs','CT'],['12 yrs','CU'],['13 yrs','CV'],['14 yrs','CW'],['15+ yrs','CX']] },
+  { g:'Dept Head / Mid-Mgmt, 36-hr', tiers:[['0–5 yrs','D1'],['6–7 yrs','D2'],['8–9 yrs','D3'],['10–11 yrs','D4'],['12–13 yrs','D5'],['14+ yrs','D6']] },
+  { g:'Dept Head / Mid-Mgmt, 36-hr (W/Cap)', tiers:[['0–5 yrs','DA'],['6–7 yrs','DB'],['8–9 yrs','DC'],['10–11 yrs','DD'],['12–13 yrs','DE'],['14+ yrs','DF']] },
+  { g:'Dept Head / Mid-Mgmt, 40-hr', tiers:[['0–5 yrs','1D'],['6–7 yrs','2D'],['8–9 yrs','4D'],['10–11 yrs','5D'],['12–13 yrs','6D'],['14+ yrs','7D']] },
+  { g:'Dept Head / Mid-Mgmt, 40-hr (W/Cap)', tiers:[['0–5 yrs','8A'],['6–7 yrs','8B'],['8–9 yrs','8C'],['10–11 yrs','8D'],['12–13 yrs','8E'],['14+ yrs','8F']] },
+  { g:'Dept Head / Mid-Mgmt, 56-hr (W/Cap)', tiers:[['0–5 yrs','MM'],['6–7 yrs','MN'],['8–9 yrs','MO'],['10–11 yrs','MP'],['12–13 yrs','MQ'],['14+ yrs','MR']] },
+  { g:'Fire Non-Shift', tiers:[['0–5 yrs','0A'],['6 yrs','0B'],['7 yrs','0C'],['8 yrs','0D'],['9 yrs','0E'],['10 yrs','0F'],['11 yrs','0G'],['12 yrs','0H'],['13 yrs','0I'],['14 yrs','0J'],['15 yrs','0K'],['16+ yrs','0L']] },
+  { g:'Fire Shift', tiers:[['0–5 yrs','F1'],['6 yrs','F2'],['7 yrs','F3'],['8 yrs','F4'],['9 yrs','F5'],['10 yrs','F6'],['11 yrs','F7'],['12 yrs','F8'],['13 yrs','F9'],['14+ yrs','F0']] },
+  { g:'Fire Shift (W/Cap)', tiers:[['0–5 yrs','FA'],['6 yrs','FB'],['7 yrs','FC'],['8 yrs','FD'],['9 yrs','FE'],['10 yrs','FF'],['11 yrs','FG'],['12 yrs','FH'],['13 yrs','FI'],['14+ yrs','FJ']] },
+  { g:'Misc (Non-Represented / LVCEA)', tiers:[['0–3 yrs','3A'],['4 yrs','3B'],['5 yrs','3C'],['6 yrs','3D'],['7 yrs','3E'],['8 yrs','3F'],['9 yrs','3G'],['10 yrs','3H'],['11 yrs','3I'],['12 yrs','3J'],['13 yrs','3K'],['14+ yrs','3L']] },
+  { g:'Misc (W/Cap)', tiers:[['0–3 yrs','MA'],['4 yrs','MB'],['5 yrs','MC'],['6 yrs','MD'],['7 yrs','ME'],['8 yrs','MF'],['9 yrs','MG'],['10 yrs','MH'],['11 yrs','MI'],['12 yrs','MJ'],['13 yrs','MK'],['14+ yrs','ML']] },
+  { g:'Police (PD)', tiers:[['0–4 yrs','PA'],['5 yrs','PB'],['6 yrs','PC'],['7 yrs','PD'],['8 yrs','PE'],['9 yrs','PF'],['10 yrs','PG'],['11 yrs','PH'],['12 yrs','PI'],['13 yrs','PJ'],['14 yrs','PK'],['15+ yrs','PL']] },
+  { g:'Police (PD) (W/Cap)', tiers:[['0–4 yrs','PM'],['5 yrs','PN'],['6 yrs','PO'],['7 yrs','PP'],['8 yrs','PQ'],['9 yrs','PR'],['10 yrs','PS'],['11 yrs','PT'],['12 yrs','PU'],['13 yrs','PV'],['14 yrs','PW'],['15+ yrs','PX']] },
+];
+
+// Health / Dental / Vision plan — cascading picker (bargaining group & carrier
+// -> coverage tier). Source: ABT (Additional Before-Tax) code export provided
+// by HR/Payroll. Rows marked "Inactive" in that export are excluded. Amounts
+// are the per-pay-period (or monthly — confirm which with Payroll) deduction
+// amount as listed in the export.
+const HEALTH_GROUPS = [
+  { g:'Dept Head / Mid-Mgmt — Health Net HMO', tiers:[['Employee Only','H5',83.65],['Couple','H6',375.74],['Employee + Child','H7',227.61],['Family','H8',398.85]] },
+  { g:'Dept Head / Mid-Mgmt — Health Net PPO', tiers:[['Single','N1',250.05],['Couple','N2',775.13],['Employee + Child','N3',518.84],['Family','N4',906.41]] },
+  { g:'Dept Head / Mid-Mgmt — Kaiser', tiers:[['Single','K5',30.81],['Couple','K6',248.93],['Employee + Child','K7',135.16],['Family','K8',237.71]] },
+  { g:'General / Fire Mid-Mgmt — Health Net HMO', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[['Single','J5',133.65],['Couple','J6',525.74],['Employee + Child','J7',327.61],['Family','J8',648.85]] },
+  { g:'General / Fire Mid-Mgmt — Health Net PPO', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[['Single','O1',300.05],['Couple','O2',925.13],['Employee + Child','O3',618.84],['Family','O4',1156.41]] },
+  { g:'General / Fire Mid-Mgmt — Kaiser', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[['Single','J1',80.81],['Couple','J2',398.93],['Employee + Child','J3',235.16],['Family','J4',487.71]] },
+  { g:'LVFA (Fire) — Health Net HMO', tiers:[['Single','H1',158.65],['Couple','H2',600.74],['Employee + Child','H3',402.61],['Family','H4',748.85]] },
+  { g:'LVFA (Fire) — Kaiser', tiers:[['Single','K1',105.81],['Couple','K2',473.93],['Employee + Child','K3',310.16],['Family','K4',587.71]] },
+  { g:'POA (Police) — Health Net HMO', tiers:[['Single','I1',52.84],['Couple','I2',375.74],['Employee + Child','I3',227.61],['Family','I4',398.85]] },
+  { g:'POA (Police) — Health Net PPO', warn:'The ABT export only lists Single and Family tiers for this plan — no Couple/Employee+Child codes on file. Confirm with Payroll if those are needed.', tiers:[['Single','I8',219.24],['Family','O5',906.41]] },
+  { g:'POA (Police) — Kaiser', warn:'The ABT export has no Single-tier code on file for this plan — confirm with Payroll if needed.', tiers:[['Couple','I5',248.93],['Employee + Child','I6',135.16],['Family','I7',237.71]] },
+];
+
+const DENTAL_GROUPS = [
+  { g:'Delta Care Dental (HMO)', warn:'The ABT export marks the Employee-Only tier (4D) Inactive — only Couple and Family are currently active.', tiers:[['Couple','5D',3.06],['Family','6D',12.40]] },
+  { g:'Delta Care — POA', warn:'The ABT export marks the Employee-Only and Employee+1 tiers (C1, C2) Inactive — only Family is currently active.', tiers:[['Family','C3',6.90]] },
+  { g:'Delta Dental PPO', tiers:[['Single','1D',8.39],['Couple','2D',32.74],['Family','3D',69.04]] },
+  { g:'Delta PPO — POA', tiers:[['Single','7D',2.89],['Employee + 1','8D',27.24],['Family','9D',63.54]] },
+];
+
+const VISION_PLAN = { g:'MetLife Vision', tiers:[['Employee Only','V1',5.24],['2-Party','V2',10.19],['Family','V3',14.63]] };
+
+// Voluntary / supplemental insurance — checkbox picker (ABT export)
+const SUPPLEMENTAL_GROUPS = [
+  { g:'Accident Insurance', items:[
+    {v:'AC',l:'Accident — Employee Only',amt:5.53}, {v:'AA',l:'Accident — Couple',amt:8.73},
+    {v:'AB',l:'Accident — Employee + Child',amt:9.39}, {v:'AE',l:'Accident — Family',amt:14.72}
+  ]},
+  { g:'Other Voluntary Coverage', items:[
+    {v:'CC',l:'Critical Illness'}, {v:'HS',l:'Hospital'}, {v:'SD',l:'Short Term Disability'},
+    {v:'LA',l:'Aflac / Retro Reimburse'}
+  ]},
+];
+// Flexible Spending Account (125 Plan) — checkbox picker
+const FSA_GROUP = { g:'Flexible Spending (125 Plan)', items:[
+  {v:'DC',l:'Dependent Care FSA'}, {v:'MC',l:'Medical Reimbursement FSA'}
+]};
+// Deferred compensation — checkbox picker
+const DEFCOMP_GROUPS = [
+  { g:'401(a)', items:[
+    {v:'L8',l:'401(a) Plan'}, {v:'L9',l:'401(a) Addtl Deferrals'}, {v:'L0',l:'401(a) Addtl Deferrals 2'},
+    {v:'LC',l:'401(a) Offset Account'}, {v:'LD',l:'401(a) Offset Account 2'}, {v:'LE',l:'401(a) Offset Account 3'}
+  ]},
+  { g:'457(b)', items:[
+    {v:'L1',l:'457(b) Deferred Comp'}, {v:'L4',l:'457(b) Deferred Comp, 50+'},
+    {v:'L2',l:'457(b) Catch-up'}, {v:'L5',l:'457(b) Def Comp +50, Addl 1'},
+    {v:'L6',l:'457(b) Def Comp +50, Addl 2'}, {v:'L7',l:'457(b) Def Comp +50, Addl 3'}
+  ]},
+];
+
+// Banks for direct deposit — name, and ABA routing number where the source
+// sheet had one on file (several rows had no routing number recorded).
+const DEPT_ACCOUNTS_FT = [
+  {code:'101-1201-403.10-00',label:'Administration — City Clerk'},
+  {code:'101-1301-402.10-00',label:'Administration — City Manager'},
+  {code:'101-1401-402.10-00',label:'Finance — Administration'},
+  {code:'101-1502-402.10-00',label:'Administration — Information Systems (Public Safety Services)'},
+  {code:'101-2001-421.10-00',label:'Fire — Administration'},
+  {code:'101-2002-421.10-00',label:'Fire — Emergency Services'},
+  {code:'101-2003-421.10-00',label:'Fire — Ambulance Operators'},
+  {code:'101-2004-421.10-00',label:'Fire — Training'},
+  {code:'101-2005-421.10-00',label:'Fire — Station Maintenance'},
+  {code:'101-2006-421.10-00',label:'Fire — Community Risk Reduction'},
+  {code:'101-2008-421.10-00',label:'Fire — Paramedic Services'},
+  {code:'101-2501-422.10-00',label:'Police — Administration'},
+  {code:'101-2503-422.10-00',label:'Police — Communications'},
+  {code:'101-2506-422.10-00',label:'Police — Records & Clerical'},
+  {code:'101-2507-422.10-00',label:'Police — Patrol Services'},
+  {code:'101-2508-422.10-00',label:'Police — Investigations'},
+  {code:'101-2510-422.10-00',label:'Police — Crime Prevention'},
+  {code:'101-2516-422.10-00',label:'Police — School Grant'},
+  {code:'101-2517-422.10-00',label:'Police — LA TRAP'},
+  {code:'101-3001-432.10-00',label:'Community Development — Administration'},
+  {code:'101-3003-432.10-00',label:'Community Development — Planning (Non-Deposit Projects)'},
+  {code:'101-3004-434.10-00',label:'Community Development — Building Inspection / Code Compliance'},
+  {code:'101-3006-432.10-00',label:'Community Development — Economic Development'},
+  {code:'101-3008-432.10-00',label:'Community Development — Housing Programs'},
+  {code:'101-4101-441.10-00',label:'Public Works — City Building Administration'},
+  {code:'101-4102-441.10-00',label:'Public Works — City Building Maintenance'},
+  {code:'101-4203-442.10-00',label:'Public Works — Street Maintenance'},
+  {code:'101-4702-447.10-00',label:'Public Works — Park Maintenance'},
+  {code:'101-4703-447.10-00',label:'Public Works — Tree Maintenance'},
+  {code:'101-6001-452.10-00',label:'Parks & Recreation — Recreation Administration'},
+  {code:'101-6002-452.10-00',label:'Parks & Recreation — Recreation Classes'},
+  {code:'101-6006-452.10-00',label:'Parks & Recreation — Sports Programs'},
+  {code:'101-6103-452.10-00',label:'Parks & Recreation — Community Center'},
+  {code:'101-6105-452.10-00',label:'Parks & Recreation — Facility Rentals'},
+  {code:'101-6201-452.10-00',label:'Parks & Recreation — Aquatics Administration'},
+  {code:'207-7128-510.10-00',label:'Fund 207 (Road Maint. & Rehab, SB1) — Streets/Alleyway Preservation (CIP)',special:true},
+  {code:'208-2502-422.10-00',label:'Police — Traffic'},
+  {code:'215-3403-435.10-00',label:'Fund 215 (CDBG) — Senior Hot Lunches Program',special:true},
+  {code:'231-2513-422.10-00',label:'Fund 231 (PD Asset Forfeiture) — Law Enforcement Ops Staff Support',special:true},
+  {code:'232-5501-450.10-00',label:'Fund 232 (Prop A Local Transit) — Transit Administration',special:true},
+  {code:'232-5516-450.10-00',label:'Fund 232 (Prop A Local Transit) — Transit Store Annex',special:true},
+  {code:'234-5601-450.10-00',label:'Fund 234 (Prop C Local Return) — Administration',special:true},
+  {code:'234-5611-450.10-00',label:'Fund 234 (Prop C Local Return) — Bus Stop Maintenance',special:true},
+  {code:'235-4803-510.10-00',label:'Fund 235 (Measure R) — Sidewalk Repairs & Rehabilitation (CIP)',special:true},
+  {code:'238-4860-443.10-00',label:'Fund 238 (Measure W) — Administration (MS4 Program)',special:true},
+  {code:'238-4863-443.10-00',label:'Fund 238 (Measure W) — Post-2018 Personnel Support',special:true},
+  {code:'502-4301-443.10-00',label:'Public Works — Water Utility Administration'},
+  {code:'502-4302-443.10-00',label:'Public Works — Water Utility Production'},
+  {code:'502-4304-443.10-00',label:'Public Works — Water Utility Transmission & Distribution'},
+  {code:'502-4314-443.10-00',label:'Public Works — Water Utility Customer Service'},
+  {code:'530-4401-444.10-00',label:'Public Works — Sewer Utility Administration'},
+  {code:'530-4402-444.10-00',label:'Public Works — Sewer System Maintenance'},
+  {code:'624-4501-445.10-00',label:'Public Works — Equipment Maintenance Administration'},
+  {code:'624-4503-445.10-00',label:'Public Works — Equipment Repair Work'},
+  {code:'730-3801-463.10-00',label:'Fund 730 (LV Successor Agency / former RDA) — Administration',special:true},
+];
+const DEPT_ACCOUNTS_PT = [
+  {code:'101-1000-401.12-00',label:'Administration — City Council'},
+  {code:'101-1301-402.12-00',label:'Administration — City Manager'},
+  {code:'101-2503-422.12-00',label:'Police — Communications'},
+  {code:'101-2507-422.12-00',label:'Police — Patrol Services'},
+  {code:'101-3001-432.12-00',label:'Community Development — Administration'},
+  {code:'101-3003-432.12-00',label:'Community Development — Planning (Non-Deposit Projects)'},
+  {code:'101-3004-434.12-00',label:'Community Development — Building Inspection / Code Compliance'},
+  {code:'101-4203-442.12-00',label:'Public Works — Street Maintenance'},
+  {code:'101-4702-447.12-00',label:'Public Works — Park Maintenance'},
+  {code:'101-6001-452.12-00',label:'Parks & Recreation — Recreation Administration'},
+  {code:'101-6002-452.12-00',label:'Parks & Recreation — Recreation Classes'},
+  {code:'101-6005-452.12-00',label:'Parks & Recreation — Preschool'},
+  {code:'101-6006-452.12-00',label:'Parks & Recreation — Sports Programs'},
+  {code:'101-6103-452.12-00',label:'Parks & Recreation — Community Center'},
+  {code:'101-6105-452.12-00',label:'Parks & Recreation — Facility Rentals'},
+  {code:'101-6106-452.12-00',label:'Parks & Recreation — Park Shelters'},
+  {code:'101-6201-452.12-00',label:'Parks & Recreation — Aquatics Administration'},
+  {code:'101-6203-452.12-00',label:'Parks & Recreation — Aquatics Recreation Swim'},
+  {code:'101-6204-452.12-00',label:'Parks & Recreation — Aquatics Swim Lessons'},
+  {code:'101-6301-452.12-00',label:'Parks & Recreation — Special Events'},
+  {code:'110-2010-421.12-00',label:'Fund 110 (CFAA) — Fire Assignment',special:true},
+  {code:'208-2502-422.12-00',label:'Police — Traffic'},
+  {code:'232-5501-450.12-00',label:'Fund 232 (Prop A Local Transit) — Transit Administration',special:true},
+  {code:'232-5516-450.12-00',label:'Fund 232 (Prop A Local Transit) — Transit Store Annex',special:true},
+  {code:'502-4301-443.12-00',label:'Public Works — Water Utility Administration'},
+];
+const DEPT_ACCOUNT_OPTGROUPS = [
+  { label:'Full-Time Accounts', options: DEPT_ACCOUNTS_FT.map(function(c){return {value:c.code,label:c.code+' \u2014 '+c.label+(c.special?' \u26A0\uFE0F':''),special:c.special};}) },
+  { label:'Part-Time Accounts', options: DEPT_ACCOUNTS_PT.map(function(c){return {value:c.code,label:c.code+' \u2014 '+c.label+(c.special?' \u26A0\uFE0F':''),special:c.special};}) },
+];
+
+// Simplified department list for "which department will this employee be
+// in" \u2014 used only on the Authorized Dept/Div/Account field at the top of
+// Position & Employment. The full chart-of-accounts list above remains in
+// use for Percent/Expense Distribution and Actual Dept/Div/Account.
+const AUTH_DEPT_SIMPLE = [
+  {v:'1000-401', l:'City Council'},
+  {v:'1301-402', l:'City Manager'},
+  {v:'1401-402', l:'Finance'},
+  {v:'1501-402', l:'Info Systems'},
+  {v:'2001-421', l:'Fire'},
+  {v:'2501-422', l:'Police'},
+  {v:'2509-422', l:'Police Reserves'},
+  {v:'3001-432', l:'Community Development'},
+  {v:'4201-442', l:'Streets'},
+  {v:'4301-443', l:'Water'},
+  {v:'4501-445', l:'Equipment Maintenance'},
+  {v:'4701-447', l:'Parks'},
+  {v:'5401-452', l:'Parks & Recreation'},
+];
+
+const BANKS = [
+["Alaska Fed Credit Union","325272021"],["Alliant Credit Union","322078972"],["Ally Bank","124003116"],
+["Altura Credit Union","322281235"],["America's Christian CU","322283767"],["American Express Nat Bank","124085066"],
+["American Express Centurion","124071889"],["Arrowhead Credit Union","322282603"],["Bank of America","122000661"],
+["Bank of America (2)","121000358"],["Bank of America (3)","111000025"],["Bank of America (4)","122101706"],
+["Bank of the West","122242843"],["C.A.H.P. C.U.","321175232"],["Calcom Fed C.U.","322283107"],
+["California Bank & Trust","122238572"],["California Bank & Trust (2)","122003396"],["Capital One","31176110"],
+["Certified Federal C.U.","322275429"],["Chase Bank","322271627"],["Chase Bank (2)","122100024"],
+["Chase Bank (3)","123271978"],["Christian Comm C.U.","322274831"],["Citibank","322271724"],
+["Citibank (2)","321171184"],["Credit Union Of So Cal","322283796"],["Desert Community Bank","122237706"],
+["Educational Emp C.U.","321172594"],["F & A C.U.","322078383"],["FAM 200","53012838"],
+["Financial Partners","322275157"],["Firefighters First C.U.","322078341"],["First Bank","81009428"],
+["First Citizens Bank","122037760"],["First City Fed C.U.","322078972"],["First Financial C.U.","322277281"],
+["Foothill Fed C.U.","322273489"],["Glendale F.C.U.","322275885"],["Golden 1 C.U.","321175261"],
+["Green Dot Bank","124303120"],["Ing Direct","31176110"],["Kinecta F.C.U.","322278073"],["Logix","322274187"],
+["Long Beach Firemans CU","322276842"],["Los Angeles F.C.U.","322078370"],["Los Angeles Firemans C.U.","322078341"],
+["Los Angeles Police F.C.U.","322078493"],["Matadors Community CU","322280278"],["MVB Bank","51504759"],
+["N.O.C.C.U.","322275636"],["Navy Federal C.U.","256074974"],["NuVision C.U.","322282399"],
+["Orange County C.U.","322281989"],["Pacific Premier Bank","322285781"],["Pacific Western Bank","122238200"],
+["Parsons F.C.U","322284698"],["Pasadena F.C.U.","322280728"],["PFF Bank & Trust",""],
+["Pomona Valley HMC","322280980"],["Popa F.C.U.","322085318"],["Printing Office","322280977"],
+["Priority One C.U.","322078930"],["Provident Bank","322270518"],["Rabobank","122238420"],
+["S.F. Fire C.U.","321076506"],["SCE F.C.U.","322280032"],["Schools First C.U.","322282001"],
+["Schwab 529 Plan, Charles","11001234"],["SOFI","31101334"],["U.S. Bank","122235821"],
+["U.S. Bank (2)","121122676"],["U.S. Bank (3)","122105155"],["U.S.C. Credit Union","322079557"],
+["Union Bank","122000496"],["USAA Federal Savings","314074269"],["Water & Power CU","322078422"],
+["Wells Fargo","910000019"],["Wells Fargo (2)","121000248"],["Wells Fargo (3)","321270742"],
+["Wells Fargo (4)","122000247"],["Wells Fargo (5)","121042882"],["Wells Fargo (6)","122105278"],
+["Wells Fargo (7)","123006800"],["Wells Fargo (8)","111900659"],["Wescom C.U.","322079353"],
+["Zions Bank","124000054"],["Other / not listed","",]
+].map(function(b){ return {name:b[0], routing:b[1]}; }).sort(function(a,b){ return a.name.localeCompare(b.name); });
+
+// Salary charts (Full-Time and Part-Time), effective dates per HR export.
+// hrs = hours worked per year (FT only; PT positions vary and are not tracked
+// on the chart). rt = rate type: A = annual/salaried, H = hourly.
+const FT_POSITIONS = [
+  {grade:'319',title:'ACCOUNT CLERK I',hrs:1872.0,rt:'A',steps:[[1,0.0,40409.0],[2,0.0,42429.0],[3,0.0,44551.0],[4,0.0,46778.0],[5,0.0,49117.0]]},
+  {grade:'321',title:'ACCOUNT CLERK II',hrs:1872.0,rt:'A',steps:[[1,0.0,44551.0],[2,0.0,46778.0],[3,0.0,49117.0],[4,0.0,51573.0],[5,0.0,54152.0]]},
+  {grade:'333',title:'ACCOUNT CLERK III',hrs:1872.0,rt:'A',steps:[[1,0.0,49117.0],[2,0.0,51573.0],[3,0.0,54152.0],[4,0.0,56859.0],[5,0.0,59702.0]]},
+  {grade:'129',title:'ACCOUNTANT',hrs:1872.0,rt:'A',steps:[[1,0.0,66240.0],[2,0.0,69552.0],[3,0.0,73029.0],[4,0.0,76681.0],[5,0.0,80515.0]]},
+  {grade:'164',title:'ACCOUNTING MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,84785.0],[2,0.0,89025.0],[3,0.0,93476.0],[4,0.0,98150.0],[5,0.0,103057.0]]},
+  {grade:'183',title:'ADMIN. BATTALION CHIEF',hrs:2080.0,rt:'A',steps:[[1,0.0,157473.0],[2,0.0,165346.0],[3,0.0,173614.0],[4,0.0,182294.0],[5,0.0,191409.0]]},
+  {grade:'131',title:'ADMINISTRATIVE ANALYST',hrs:1872.0,rt:'A',steps:[[1,0.0,55466.0],[2,0.0,58239.0],[3,0.0,61151.0],[4,0.0,64209.0],[5,0.0,67419.0]]},
+  {grade:'301',title:'ADMINISTRATIVE CLERK I',hrs:1872.0,rt:'A',steps:[[1,0.0,37314.0],[2,0.0,39180.0],[3,0.0,41139.0],[4,0.0,43195.0],[5,0.0,45355.0]]},
+  {grade:'309',title:'ADMINISTRATIVE CLERK II',hrs:1872.0,rt:'A',steps:[[1,0.0,41139.0],[2,0.0,43196.0],[3,0.0,45356.0],[4,0.0,47623.0],[5,0.0,50005.0]]},
+  {grade:'340',title:'ADMINISTRATIVE SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,52048.0],[2,0.0,54651.0],[3,0.0,57383.0],[4,0.0,60252.0],[5,0.0,63265.0]]},
+  {grade:'520',title:'AMBULANCE OPERATOR',hrs:2080.0,rt:'A',steps:[[1,0.0,35152.0],[2,0.0,36910.0],[3,0.0,38755.0],[4,0.0,40693.0],[5,0.0,42727.0]]},
+  {grade:'124',title:'ASSISTANT CITY CLERK',hrs:1872.0,rt:'A',steps:[[1,0.0,69016.0],[2,0.0,72467.0],[3,0.0,76091.0],[4,0.0,79895.0],[5,0.0,83890.0]]},
+  {grade:'280',title:'ASSISTANT CITY MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,168886.0],[2,0.0,177330.0],[3,0.0,186197.0],[4,0.0,195507.0],[5,0.0,205282.0]]},
+  {grade:'147',title:'ASSISTANT PLANNER',hrs:1872.0,rt:'A',steps:[[1,0.0,65686.0],[2,0.0,68970.0],[3,0.0,72419.0],[4,0.0,76040.0],[5,0.0,79842.0]]},
+  {grade:'148',title:'ASSOCIATE PLANNER',hrs:1872.0,rt:'A',steps:[[1,0.0,72418.0],[2,0.0,76039.0],[3,0.0,79841.0],[4,0.0,83833.0],[5,0.0,88025.0]]},
+  {grade:'297',title:'ASST CITY MNGR/DIR PUB WK',hrs:1872.0,rt:'A',steps:[[1,0.0,179094.0],[2,0.0,188048.0],[3,0.0,197451.0],[4,0.0,207323.0],[5,0.0,217690.0]]},
+  {grade:'272',title:'ASST. TO THE CITY MGR.',hrs:1872.0,rt:'A',steps:[[1,0.0,121726.0],[2,0.0,127812.0],[3,0.0,134202.0],[4,0.0,140912.0],[5,0.0,147958.0]]},
+  {grade:'306',title:'AUTO PARTS TECHNICIAN',hrs:1872.0,rt:'A',steps:[[1,0.0,42776.0],[2,0.0,44915.0],[3,0.0,47160.0],[4,0.0,49518.0],[5,0.0,51994.0]]},
+  {grade:'298',title:'CITY MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,275679.0]]},
+  {grade:'149',title:'CODE COMPLIANCE OFFICER',hrs:1872.0,rt:'A',steps:[[1,0.0,62725.0],[2,0.0,65861.0],[3,0.0,69154.0],[4,0.0,72611.0],[5,0.0,76242.0]]},
+  {grade:'156',title:'COMM. SERV. SUPERINTEND',hrs:1872.0,rt:'A',steps:[[1,0.0,84159.0],[2,0.0,88367.0],[3,0.0,92785.0],[4,0.0,97425.0],[5,0.0,102296.0]]},
+  {grade:'425',title:'COMMUNICATIONS OFFICER',hrs:2080.0,rt:'A',steps:[[1,0.0,62189.0],[2,0.0,65299.0],[3,0.0,68564.0],[4,0.0,71992.0],[5,0.0,75592.0]]},
+  {grade:'138',title:'COMMUNICATIONS SUPERVISOR',hrs:2080.0,rt:'A',steps:[[1,0.0,78093.0],[2,0.0,81997.0],[3,0.0,86097.0],[4,0.0,90402.0],[5,0.0,94922.0]]},
+  {grade:'119',title:'COMMUNITY RISK RED SPEC',hrs:1872.0,rt:'A',steps:[[1,0.0,91723.0],[2,0.0,96309.0],[3,0.0,101125.0],[4,0.0,106181.0],[5,0.0,111490.0]]},
+  {grade:'317',title:'CUSTOMER SERVICE ASSISTNT',hrs:1872.0,rt:'A',steps:[[1,0.0,37314.0],[2,0.0,39180.0],[3,0.0,41139.0],[4,0.0,43195.0],[5,0.0,45355.0]]},
+  {grade:'331',title:'CUSTOMER SERVICE LEAD',hrs:1872.0,rt:'A',steps:[[1,0.0,55115.0],[2,0.0,57870.0],[3,0.0,60764.0],[4,0.0,63802.0],[5,0.0,66992.0]]},
+  {grade:'318',title:'CUSTOMER SERVICE REP. I',hrs:1872.0,rt:'A',steps:[[1,0.0,45343.0],[2,0.0,47610.0],[3,0.0,49990.0],[4,0.0,52490.0],[5,0.0,55114.0]]},
+  {grade:'330',title:'CUSTOMER SERVICE REP. II',hrs:1872.0,rt:'A',steps:[[1,0.0,49991.0],[2,0.0,52490.0],[3,0.0,55115.0],[4,0.0,57871.0],[5,0.0,60764.0]]},
+  {grade:'118',title:'DEPUTY CITY CLERK',hrs:1872.0,rt:'A',steps:[[1,0.0,60478.0],[2,0.0,63502.0],[3,0.0,66677.0],[4,0.0,70011.0],[5,0.0,73511.0]]},
+  {grade:'173',title:'DEPUTY DIR OF PUBLIC WRKS',hrs:1872.0,rt:'A',steps:[[1,0.0,129149.0],[2,0.0,135607.0],[3,0.0,142387.0],[4,0.0,149507.0],[5,0.0,156982.0]]},
+  {grade:'125',title:'DEPUTY FIRE CHIEF',hrs:2080.0,rt:'A',steps:[[1,0.0,188770.0],[2,0.0,198209.0],[3,0.0,208119.0],[4,0.0,218525.0],[5,0.0,229452.0]]},
+  {grade:'123',title:'DEPUTY FIRE MARSHAL',hrs:1872.0,rt:'A',steps:[[1,0.0,76175.0],[2,0.0,79984.0],[3,0.0,83983.0],[4,0.0,88182.0],[5,0.0,92592.0]]},
+  {grade:'275',title:'DIR OF COMMUNITY DEV.',hrs:1872.0,rt:'A',steps:[[1,0.0,154988.0],[2,0.0,162737.0],[3,0.0,170874.0],[4,0.0,179418.0],[5,0.0,188389.0]]},
+  {grade:'271',title:'DIR OF PARKS & RECREATION',hrs:1872.0,rt:'A',steps:[[1,0.0,145499.0],[2,0.0,152774.0],[3,0.0,160412.0],[4,0.0,168433.0],[5,0.0,176855.0]]},
+  {grade:'286',title:'DIR OF PUB WKS/CITY ENGNR',hrs:1872.0,rt:'A',steps:[[1,0.0,189221.57],[2,0.0,198682.65],[3,0.0,208616.78],[4,0.0,219047.62],[5,0.0,230000.0]]},
+  {grade:'285',title:'DIR. OF PUBLIC WORKS',hrs:1872.0,rt:'A',steps:[[1,0.0,176223.0],[2,0.0,185034.0],[3,0.0,194286.0],[4,0.0,204000.0],[5,0.0,214200.0]]},
+  {grade:'276',title:'DIRECTOR OF FINANCE',hrs:1872.0,rt:'A',steps:[[1,0.0,154250.0],[2,0.0,161962.0],[3,0.0,170060.0],[4,0.0,178563.0],[5,0.0,187492.0]]},
+  {grade:'345',title:'EQUIPMENT MECHANIC I',hrs:1872.0,rt:'A',steps:[[1,0.0,52485.0],[2,0.0,55109.0],[3,0.0,57865.0],[4,0.0,60758.0],[5,0.0,63796.0]]},
+  {grade:'347',title:'EQUIPMENT MECHANIC II',hrs:1872.0,rt:'A',steps:[[1,0.0,57865.0],[2,0.0,60758.0],[3,0.0,63796.0],[4,0.0,66986.0],[5,0.0,70336.0]]},
+  {grade:'336',title:'EQUIPMENT OPERATOR',hrs:1872.0,rt:'A',steps:[[1,0.0,51993.0],[2,0.0,54592.0],[3,0.0,57322.0],[4,0.0,60188.0],[5,0.0,63197.0]]},
+  {grade:'326',title:'EQUIPMENT SERVICE WORKER',hrs:1872.0,rt:'A',steps:[[1,0.0,47161.0],[2,0.0,49519.0],[3,0.0,51995.0],[4,0.0,54594.0],[5,0.0,57324.0]]},
+  {grade:'132',title:'EXEC ASST TO CITY MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,66362.0],[2,0.0,69680.0],[3,0.0,73164.0],[4,0.0,76822.0],[5,0.0,80663.0]]},
+  {grade:'166',title:'FINANCE MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,113800.0],[2,0.0,119490.0],[3,0.0,125464.0],[4,0.0,131737.0],[5,0.0,138324.0]]},
+  {grade:'273',title:'FINANCE OFFICER',hrs:1872.0,rt:'A',steps:[[1,0.0,114074.0],[2,0.0,119777.0],[3,0.0,125766.0],[4,0.0,132055.0],[5,0.0,138657.0]]},
+  {grade:'186',title:'FIRE BATTALION CHIEF',hrs:2912.0,rt:'A',steps:[[1,0.0,157473.0],[2,0.0,165346.0],[3,0.0,173614.0],[4,0.0,182294.0],[5,0.0,191409.0]]},
+  {grade:'580',title:'FIRE CAPTAIN',hrs:2912.0,rt:'A',steps:[[1,0.0,126663.0],[2,0.0,132996.0],[3,0.0,139646.0],[4,0.0,146628.0],[5,0.0,153959.0]]},
+  {grade:'591',title:'FIRE CAPTAIN PARAMEDIC',hrs:2912.0,rt:'A',steps:[[1,0.0,143894.0],[2,0.0,150227.0],[3,0.0,156877.0],[4,0.0,163860.0],[5,0.0,171191.0]]},
+  {grade:'290',title:'FIRE CHIEF',hrs:2080.0,rt:'A',steps:[[1,0.0,206382.0],[2,0.0,216701.0],[3,0.0,227536.0],[4,0.0,238913.0],[5,0.0,250858.0]]},
+  {grade:'565',title:'FIRE ENGINEER',hrs:2912.0,rt:'A',steps:[[1,0.0,107933.0],[2,0.0,113329.0],[3,0.0,118996.0],[4,0.0,124946.0],[5,0.0,131193.0]]},
+  {grade:'577',title:'FIRE ENGINEER PARAMEDIC',hrs:2912.0,rt:'A',steps:[[1,0.0,125164.0],[2,0.0,130561.0],[3,0.0,136228.0],[4,0.0,142177.0],[5,0.0,148425.0]]},
+  {grade:'122',title:'FIRE MARSHAL',hrs:1872.0,rt:'A',steps:[[1,0.0,114354.0],[2,0.0,120072.0],[3,0.0,126075.0],[4,0.0,132379.0],[5,0.0,138998.0]]},
+  {grade:'350',title:'FIRE SAFETY SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,61138.0],[2,0.0,64195.0],[3,0.0,67405.0],[4,0.0,70775.0],[5,0.0,74314.0]]},
+  {grade:'540',title:'FIREFIGHTER',hrs:2912.0,rt:'A',steps:[[1,0.0,94510.0],[2,0.0,99236.0],[3,0.0,104198.0],[4,0.0,109407.0],[5,0.0,114878.0]]},
+  {grade:'551',title:'FIREFIGHTER PARAMEDIC',hrs:2912.0,rt:'A',steps:[[1,0.0,111742.0],[2,0.0,116467.0],[3,0.0,121429.0],[4,0.0,126639.0],[5,0.0,132109.0]]},
+  {grade:'535',title:'FIRFIGHTR-PARAMED TRAINEE',hrs:2912.0,rt:'A',steps:[[1,0.0,71838.0],[2,0.0,75430.0],[3,0.0,79202.0],[4,0.0,83162.0],[5,0.0,87320.0]]},
+  {grade:'159',title:'FLEET ANALYST',hrs:1872.0,rt:'A',steps:[[1,0.0,55468.0],[2,0.0,58241.0],[3,0.0,61153.0],[4,0.0,64211.0],[5,0.0,67421.0]]},
+  {grade:'158',title:'FLEET MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,113801.0],[2,0.0,119491.0],[3,0.0,125466.0],[4,0.0,131739.0],[5,0.0,138326.0]]},
+  {grade:'346',title:'HEAVY EQUIPMENT MECHANIC',hrs:1872.0,rt:'A',steps:[[1,0.0,55944.0],[2,0.0,58741.0],[3,0.0,61679.0],[4,0.0,64762.0],[5,0.0,68001.0]]},
+  {grade:'117',title:'HUMAN RESOURCES SPECIALST',hrs:1872.0,rt:'A',steps:[[1,0.0,54113.0],[2,0.0,56819.0],[3,0.0,59660.0],[4,0.0,62643.0],[5,0.0,65775.0]]},
+  {grade:'278',title:'INFO SYSTEMS MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,109713.0],[2,0.0,115198.0],[3,0.0,120958.0],[4,0.0,127006.0],[5,0.0,133357.0]]},
+  {grade:'128',title:'INFO SYSTEMS SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,71784.0],[2,0.0,75373.0],[3,0.0,79141.0],[4,0.0,83098.0],[5,0.0,87253.0]]},
+  {grade:'134',title:'INFO SYSTEMS TECHNICIAN',hrs:1872.0,rt:'A',steps:[[1,0.0,55809.0],[2,0.0,58599.0],[3,0.0,61529.0],[4,0.0,64606.0],[5,0.0,67836.0]]},
+  {grade:'323',title:'IRRIGATION SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,51993.0],[2,0.0,54592.0],[3,0.0,57322.0],[4,0.0,60188.0],[5,0.0,63197.0]]},
+  {grade:'348',title:'MAINTENANCE LEADWORKER',hrs:1872.0,rt:'A',steps:[[1,0.0,55414.0],[2,0.0,58184.0],[3,0.0,61094.0],[4,0.0,64148.0],[5,0.0,67356.0]]},
+  {grade:'167',title:'MAINTENANCE MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,113800.0],[2,0.0,119490.0],[3,0.0,125464.0],[4,0.0,131737.0],[5,0.0,138324.0]]},
+  {grade:'146',title:'MAINTENANCE SUPERVISOR',hrs:1872.0,rt:'A',steps:[[1,0.0,72673.0],[2,0.0,76306.0],[3,0.0,80122.0],[4,0.0,84128.0],[5,0.0,88334.0]]},
+  {grade:'312',title:'MAINTENANCE WORKER I',hrs:1872.0,rt:'A',steps:[[1,0.0,42776.0],[2,0.0,44915.0],[3,0.0,47160.0],[4,0.0,49517.0],[5,0.0,51994.0]]},
+  {grade:'325',title:'MAINTENANCE WORKER II',hrs:1872.0,rt:'A',steps:[[1,0.0,47160.0],[2,0.0,49518.0],[3,0.0,51994.0],[4,0.0,54593.0],[5,0.0,57323.0]]},
+  {grade:'337',title:'MAINTENANCE WORKER III',hrs:1872.0,rt:'A',steps:[[1,0.0,51994.0],[2,0.0,54594.0],[3,0.0,57324.0],[4,0.0,60190.0],[5,0.0,63199.0]]},
+  {grade:'140',title:'MANAGEMENT ANALYST',hrs:1872.0,rt:'A',steps:[[1,0.0,67421.0],[2,0.0,70792.0],[3,0.0,74331.0],[4,0.0,78048.0],[5,0.0,81950.0]]},
+  {grade:'142',title:'MANAGEMENT ANALYST-Y',hrs:1872.0,rt:'A',steps:[[1,0.0,99612.0]]},
+  {grade:'175',title:'PARKS & REC COORDINATR',hrs:1872.0,rt:'A',steps:[[1,0.0,52447.0],[2,0.0,55069.0],[3,0.0,57823.0],[4,0.0,60714.0],[5,0.0,63749.0]]},
+  {grade:'174',title:'PARKS & REC MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,113801.0],[2,0.0,119491.0],[3,0.0,125466.0],[4,0.0,131739.0],[5,0.0,138326.0]]},
+  {grade:'354',title:'PARKS & REC SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,40188.0],[2,0.0,42197.0],[3,0.0,44307.0],[4,0.0,46522.0],[5,0.0,48848.0]]},
+  {grade:'127',title:'PARKS & REC SUPERVISOR',hrs:1872.0,rt:'A',steps:[[1,0.0,67274.0],[2,0.0,70637.0],[3,0.0,74169.0],[4,0.0,77878.0],[5,0.0,81772.0]]},
+  {grade:'162',title:'PARKS MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,113801.0],[2,0.0,119491.0],[3,0.0,125466.0],[4,0.0,131739.0],[5,0.0,138326.0]]},
+  {grade:'130',title:'PAYROLL SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,76680.0],[2,0.0,80514.0],[3,0.0,84540.0],[4,0.0,88767.0],[5,0.0,93205.0]]},
+  {grade:'292',title:'PERSONNEL OFFICER',hrs:1872.0,rt:'A',steps:[[1,0.0,112746.0],[2,0.0,118383.0],[3,0.0,124302.0],[4,0.0,130517.0],[5,0.0,137043.0]]},
+  {grade:'155',title:'PLANNING MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,103055.0],[2,0.0,108208.0],[3,0.0,113619.0],[4,0.0,119300.0],[5,0.0,125264.0]]},
+  {grade:'314',title:'POLICE AIDE I',hrs:1872.0,rt:'A',steps:[[1,0.0,40555.0],[2,0.0,42583.0],[3,0.0,44712.0],[4,0.0,46948.0],[5,0.0,49295.0]]},
+  {grade:'316',title:'POLICE AIDE II',hrs:1872.0,rt:'A',steps:[[1,0.0,44712.0],[2,0.0,46947.0],[3,0.0,49295.0],[4,0.0,51760.0],[5,0.0,54348.0]]},
+  {grade:'776',title:'POLICE CAPTAIN',hrs:2080.0,rt:'A',steps:[[1,0.0,195874.0],[2,0.0,205668.0],[3,0.0,215951.0],[4,0.0,226749.0],[5,0.0,238086.0]]},
+  {grade:'295',title:'POLICE CHIEF',hrs:2080.0,rt:'A',steps:[[1,0.0,207585.0],[2,0.0,217964.0],[3,0.0,228863.0],[4,0.0,240306.0],[5,0.0,252321.0]]},
+  {grade:'303',title:'POLICE CLERK I',hrs:1872.0,rt:'A',steps:[[1,0.0,40555.0],[2,0.0,42583.0],[3,0.0,44712.0],[4,0.0,46948.0],[5,0.0,49295.0]]},
+  {grade:'315',title:'POLICE CLERK II',hrs:1872.0,rt:'A',steps:[[1,0.0,44712.0],[2,0.0,46947.0],[3,0.0,49295.0],[4,0.0,51760.0],[5,0.0,54348.0]]},
+  {grade:'338',title:'POLICE COMM. ENGAGE. OFCR',hrs:1872.0,rt:'A',steps:[[1,0.0,54347.0],[2,0.0,57064.0],[3,0.0,59918.0],[4,0.0,62914.0],[5,0.0,66059.0]]},
+  {grade:'135',title:'POLICE COMM. ENGAGE. SUPR',hrs:1872.0,rt:'A',steps:[[1,0.0,87951.0],[2,0.0,92349.0],[3,0.0,96966.0],[4,0.0,101815.0],[5,0.0,106906.0]]},
+  {grade:'460',title:'POLICE CORPORAL',hrs:2080.0,rt:'A',steps:[[1,0.0,104372.0],[2,0.0,109591.0],[3,0.0,115070.0],[4,0.0,120824.0],[5,0.0,126865.0]]},
+  {grade:'470',title:'POLICE CORPORAL/MOTOR OFF',hrs:2080.0,rt:'A',steps:[[1,0.0,105359.0],[2,0.0,110627.0],[3,0.0,116159.0],[4,0.0,121967.0],[5,0.0,128065.0]]},
+  {grade:'786',title:'POLICE LIEUTENANT',hrs:2080.0,rt:'A',steps:[[1,0.0,174460.0],[2,0.0,183183.0],[3,0.0,192342.0],[4,0.0,201959.0],[5,0.0,212057.0]]},
+  {grade:'450',title:'POLICE OFFICER',hrs:2080.0,rt:'A',steps:[[1,0.0,94884.0],[2,0.0,99628.0],[3,0.0,104609.0],[4,0.0,109840.0],[5,0.0,115332.0]]},
+  {grade:'133',title:'POLICE RECORDS SUPRVR',hrs:2080.0,rt:'A',steps:[[1,0.0,69022.0],[2,0.0,72474.0],[3,0.0,76097.0],[4,0.0,79902.0],[5,0.0,83897.0]]},
+  {grade:'440',title:'POLICE RECRUIT TRAINEE',hrs:2080.0,rt:'A',steps:[[1,0.0,80651.0],[2,0.0,84684.0],[3,0.0,88918.0],[4,0.0,93364.0],[5,0.0,98032.0]]},
+  {grade:'465',title:'POLICE SENIOR OFFICER',hrs:2080.0,rt:'A',steps:[[1,0.0,103963.0],[2,0.0,109161.0],[3,0.0,114619.0],[4,0.0,120350.0],[5,0.0,126368.0]]},
+  {grade:'480',title:'POLICE SERGEANT',hrs:2080.0,rt:'A',steps:[[1,0.0,125705.0],[2,0.0,131990.0],[3,0.0,138589.0],[4,0.0,145519.0],[5,0.0,152795.0]]},
+  {grade:'144',title:'POLICE SERV. COORDINATOR',hrs:1872.0,rt:'A',steps:[[1,0.0,74391.0],[2,0.0,78110.0],[3,0.0,82016.0],[4,0.0,86116.0],[5,0.0,90422.0]]},
+  {grade:'322',title:'POLICE SERVICE TECHNICAN',hrs:1872.0,rt:'A',steps:[[1,0.0,62189.0],[2,0.0,65299.0],[3,0.0,68564.0],[4,0.0,71992.0],[5,0.0,75592.0]]},
+  {grade:'145',title:'POLICE SUPPORT SVC MANAGR',hrs:2080.0,rt:'A',steps:[[1,0.0,91057.0],[2,0.0,95610.0],[3,0.0,100390.0],[4,0.0,105410.0],[5,0.0,110680.0]]},
+  {grade:'172',title:'PUBLIC WORKS MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,113800.0],[2,0.0,119490.0],[3,0.0,125464.0],[4,0.0,131737.0],[5,0.0,138324.0]]},
+  {grade:'139',title:'SENIOR ACCOUNTANT',hrs:1872.0,rt:'A',steps:[[1,0.0,76680.0],[2,0.0,80514.0],[3,0.0,84540.0],[4,0.0,88767.0],[5,0.0,93205.0]]},
+  {grade:'349',title:'SENIOR EQUIPMENT MECHANIC',hrs:1872.0,rt:'A',steps:[[1,0.0,66985.0],[2,0.0,70334.0],[3,0.0,73851.0],[4,0.0,77544.0],[5,0.0,81421.0]]},
+  {grade:'154',title:'SENIOR PLANNER',hrs:1872.0,rt:'A',steps:[[1,0.0,83832.0],[2,0.0,88024.0],[3,0.0,92425.0],[4,0.0,97046.0],[5,0.0,101899.0]]},
+  {grade:'320',title:'SENIOR POLICE AIDE',hrs:1872.0,rt:'A',steps:[[1,0.0,49296.0],[2,0.0,51761.0],[3,0.0,54349.0],[4,0.0,57066.0],[5,0.0,59919.0]]},
+  {grade:'141',title:'SR. MANAGEMENT ANALYST',hrs:1872.0,rt:'A',steps:[[1,0.0,81951.0],[2,0.0,86049.0],[3,0.0,90351.0],[4,0.0,94869.0],[5,0.0,99612.0]]},
+  {grade:'168',title:'UTILITIES MANAGER',hrs:1872.0,rt:'A',steps:[[1,0.0,127066.0],[2,0.0,133420.0],[3,0.0,140091.0],[4,0.0,147095.0],[5,0.0,154450.0]]},
+  {grade:'150',title:'UTILITY SUPERVISOR',hrs:1872.0,rt:'A',steps:[[1,0.0,79582.0],[2,0.0,83561.0],[3,0.0,87739.0],[4,0.0,92126.0],[5,0.0,96733.0]]},
+  {grade:'359',title:'WATER METER TECHNICIAN I',hrs:1872.0,rt:'A',steps:[[1,0.0,45343.0],[2,0.0,47610.0],[3,0.0,49990.0],[4,0.0,52490.0],[5,0.0,55114.0]]},
+  {grade:'360',title:'WATER METER TECHNICIAN II',hrs:1872.0,rt:'A',steps:[[1,0.0,49991.0],[2,0.0,52490.0],[3,0.0,55115.0],[4,0.0,57871.0],[5,0.0,60764.0]]},
+  {grade:'152',title:'WATER SUPERVISOR',hrs:1872.0,rt:'A',steps:[[1,0.0,83563.0],[2,0.0,87741.0],[3,0.0,92128.0],[4,0.0,96735.0],[5,0.0,101571.0]]},
+  {grade:'353',title:'WATER SYSTEM SPECIALIST',hrs:1872.0,rt:'A',steps:[[1,0.0,69372.0],[2,0.0,72841.0],[3,0.0,76483.0],[4,0.0,80307.0],[5,0.0,84323.0]]},
+  {grade:'358',title:'WATER UTILITY LEADWORKER',hrs:1872.0,rt:'A',steps:[[1,0.0,62739.0],[2,0.0,65876.0],[3,0.0,69170.0],[4,0.0,72628.0],[5,0.0,76260.0]]},
+  {grade:'355',title:'WATER UTILITY WORKER I',hrs:1872.0,rt:'A',steps:[[1,0.0,44028.0],[2,0.0,46229.0],[3,0.0,48541.0],[4,0.0,50968.0],[5,0.0,53516.0]]},
+  {grade:'356',title:'WATER UTILITY WORKER II',hrs:1872.0,rt:'A',steps:[[1,0.0,48541.0],[2,0.0,50968.0],[3,0.0,53517.0],[4,0.0,56192.0],[5,0.0,59002.0]]},
+  {grade:'357',title:'WATER UTILITY WORKER III',hrs:1872.0,rt:'A',steps:[[1,0.0,53516.0],[2,0.0,56192.0],[3,0.0,59002.0],[4,0.0,61952.0],[5,0.0,65050.0]]},
+  {grade:'151',title:'WATER/SEWER MAINT. SUPERV',hrs:1872.0,rt:'A',steps:[[1,0.0,79584.0],[2,0.0,83563.0],[3,0.0,87741.0],[4,0.0,92128.0],[5,0.0,96735.0]]},
+  {grade:'352',title:'WTR. PROD. SYS. OPERATOR',hrs:1872.0,rt:'A',steps:[[1,0.0,59225.0],[2,0.0,62186.0],[3,0.0,65295.0],[4,0.0,68560.0],[5,0.0,71988.0]]}
+];
+const PT_POSITIONS = [
+  {grade:'601',title:'PT-ACCOUNT CLERK I',hrs:0,rt:'H',steps:[[1,21.585,0.0],[2,22.6642,0.0],[3,23.7979,0.0],[4,24.9877,0.0],[5,26.2375,0.0]]},
+  {grade:'602',title:'PT-ADMIN. ANALYST',hrs:0,rt:'H',steps:[[1,29.6292,0.0],[2,31.1109,0.0],[3,32.6663,0.0],[4,34.2999,0.0],[5,36.0145,0.0]]},
+  {grade:'608',title:'PT-ADMIN. BATTALION CHIEF',hrs:0,rt:'H',steps:[[1,75.7083,0.0],[2,79.4937,0.0],[3,83.4686,0.0],[4,87.6416,0.0],[5,92.0236,0.0]]},
+  {grade:'605',title:'PT-ADMIN. CLERK I',hrs:0,rt:'H',steps:[[1,19.9322,0.0],[2,20.9289,0.0],[3,21.9756,0.0],[4,23.0739,0.0],[5,24.2278,0.0]]},
+  {grade:'603',title:'PT-ADMIN. CLERK II',hrs:0,rt:'H',steps:[[1,21.9756,0.0],[2,23.0739,0.0],[3,24.2278,0.0],[4,25.439,0.0],[5,26.7118,0.0]]},
+  {grade:'632',title:'PT-ADMIN. FIRE CAPTAIN',hrs:0,rt:'H',steps:[[1,58.5921,0.0],[2,61.5207,0.0],[3,64.5972,0.0],[4,67.8269,0.0],[5,71.2188,0.0]]},
+  {grade:'606',title:'PT-ADMINISTRATIVE INTERN',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6323,0.0],[4,19.5639,0.0]]},
+  {grade:'607',title:'PT-ADMINISTRATIVE OFFICER',hrs:0,rt:'H',steps:[[1,58.5921,0.0],[2,61.5207,0.0],[3,64.5972,0.0],[4,67.8269,0.0],[5,71.2188,0.0]]},
+  {grade:'609',title:'PT-ADMINISTRATIVE SEC.',hrs:0,rt:'H',steps:[[1,27.8034,0.0],[2,29.1942,0.0],[3,30.6527,0.0],[4,32.1855,0.0],[5,33.7957,0.0]]},
+  {grade:'613',title:'PT-AMBULANCE OPERATOR',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6323,0.0],[4,19.5639,0.0],[5,20.5421,0.0]]},
+  {grade:'677',title:'PT-APPRENTICE FIREFIGHTER',hrs:0,rt:'H',steps:[[1,16.5,0.0]]},
+  {grade:'610',title:'PT-ASSISTANT PLANNER',hrs:0,rt:'H',steps:[[1,35.0885,0.0],[2,36.8427,0.0],[3,38.6852,0.0],[4,40.6192,0.0],[5,42.6505,0.0]]},
+  {grade:'611',title:'PT-ASSISTANT POOL MANAGER',hrs:0,rt:'H',steps:[[1,22.0849,0.0],[2,23.1892,0.0],[3,24.3487,0.0],[4,25.5661,0.0]]},
+  {grade:'614',title:'PT-AUTO PARTS TECHNICIAN',hrs:0,rt:'H',steps:[[1,22.8505,0.0],[2,23.9927,0.0],[3,25.192,0.0],[4,26.452,0.0],[5,27.7753,0.0]]},
+  {grade:'639',title:'PT-CITY COUNCIL',hrs:0,rt:'A',steps:[[1,0.0,11400.0]]},
+  {grade:'615',title:'PT-CLERICAL ASSISTANT I',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'617',title:'PT-CLERICAL ASSISTANT II',hrs:0,rt:'H',steps:[[1,18.6322,0.0],[2,19.563,0.0],[3,20.5411,0.0],[4,21.5681,0.0]]},
+  {grade:'616',title:'PT-CLERICAL ASSISTANT III',hrs:0,rt:'H',steps:[[1,20.5411,0.0],[2,21.5681,0.0],[3,22.6466,0.0],[4,23.779,0.0]]},
+  {grade:'619',title:'PT-COMMUNICATIONS OFFICER',hrs:0,rt:'H',steps:[[1,29.8983,0.0],[2,31.3935,0.0],[3,32.9634,0.0],[4,34.6115,0.0],[5,36.342,0.0]]},
+  {grade:'620',title:'PT-COMPUTER OPERATOR',hrs:0,rt:'H',steps:[[1,17.2407,0.0],[2,18.1027,0.0],[3,19.0077,0.0],[4,19.9582,0.0]]},
+  {grade:'623',title:'PT-CROSSING GUARD',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'625',title:'PT-CUST SERV REP TRAINEE',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'626',title:'PT-DEPUTY EMRGNCY OPS CHF',hrs:0,rt:'H',steps:[[1,78.6055,0.0],[2,82.536,0.0],[3,86.6627,0.0],[4,90.9958,0.0],[5,95.5455,0.0]]},
+  {grade:'624',title:'PT-DEPUTY FIRE MARSHALL',hrs:0,rt:'H',steps:[[5,44.624,0.0]]},
+  {grade:'689',title:'PT-EFFICIENCY TECHNICIAN',hrs:0,rt:'H',steps:[[1,23.0739,0.0],[2,24.2278,0.0],[3,25.44,0.0],[4,26.712,0.0]]},
+  {grade:'690',title:'PT-ELECTION ASSISTANT',hrs:0,rt:'H',steps:[[1,17.069,0.0],[2,17.9275,0.0],[3,18.8264,0.0],[4,19.7662,0.0]]},
+  {grade:'628',title:'PT-ELECTION COORDINATOR',hrs:0,rt:'H',steps:[[1,53.0,0.0]]},
+  {grade:'618',title:'PT-ELECTION OFFICIAL',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'627',title:'PT-ENGINEERING AIDE',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'629',title:'PT-EQ. MECHANIC\'S AIDE',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'636',title:'PT-FINANCE MANAGER',hrs:0,rt:'H',steps:[[1,60.7909,0.0],[2,63.8308,0.0],[3,67.022,0.0],[4,70.3735,0.0],[5,73.8921,0.0]]},
+  {grade:'638',title:'PT-FIRE MARSHAL',hrs:0,rt:'H',steps:[[1,61.0866,0.0],[2,64.1409,0.0],[3,67.348,0.0],[4,70.7154,0.0],[5,74.2512,0.0]]},
+  {grade:'634',title:'PT-FIRE PREVENTION AIDE',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'630',title:'PT-FIRE SAFETY SPECIALIST',hrs:0,rt:'H',steps:[[1,32.6592,0.0],[2,34.2918,0.0],[3,36.0064,0.0],[4,37.8068,0.0],[5,39.6975,0.0]]},
+  {grade:'633',title:'PT-GRADUATE INTERN',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'635',title:'PT-LABORER',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'637',title:'PT-LIFEGUARD',hrs:0,rt:'H',steps:[[1,17.745,0.0],[2,18.6322,0.0],[3,19.563,0.0],[4,20.5411,0.0]]},
+  {grade:'612',title:'PT-MAINTENANCE WORKER I',hrs:0,rt:'H',steps:[[1,22.8505,0.0],[2,23.9927,0.0],[3,25.192,0.0],[4,26.452,0.0],[5,27.7753,0.0]]},
+  {grade:'640',title:'PT-MOBILE COMMND PST OPRT',hrs:0,rt:'H',steps:[[1,56.5485,0.0]]},
+  {grade:'642',title:'PT-PARK INTERN',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'644',title:'PT-PARKING CITAT HEAR OFC',hrs:0,rt:'H',steps:[[1,60.0,0.0]]},
+  {grade:'646',title:'PT-PARKS WORKER I',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'649',title:'PT-PLANNING INTERN',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'651',title:'PT-POLICE AIDE I',hrs:0,rt:'H',steps:[[1,21.663,0.0],[2,22.7462,0.0],[3,23.8843,0.0],[4,25.0786,0.0],[5,26.3325,0.0]]},
+  {grade:'652',title:'PT-POLICE AIDE II',hrs:0,rt:'H',steps:[[1,23.8843,0.0],[2,25.0786,0.0],[3,26.3325,0.0],[4,27.6491,0.0],[5,29.0319,0.0]]},
+  {grade:'655',title:'PT-POLICE CADET',hrs:0,rt:'H',steps:[[1,17.238,0.0],[2,18.0999,0.0],[3,19.0049,0.0],[4,19.9552,0.0]]},
+  {grade:'604',title:'PT-POLICE CLERK I',hrs:0,rt:'H',steps:[[1,21.663,0.0],[2,22.7462,0.0],[3,23.8843,0.0],[4,25.0786,0.0],[5,26.3325,0.0]]},
+  {grade:'654',title:'PT-POOL AIDE',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'656',title:'PT-POOL CASHIER',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'657',title:'PT-POOL INSTRUCTOR I',hrs:0,rt:'H',steps:[[1,20.5411,0.0],[2,21.5681,0.0],[3,22.6465,0.0],[4,23.7788,0.0]]},
+  {grade:'661',title:'PT-POOL MANAGER',hrs:0,rt:'H',steps:[[1,26.2449,0.0],[2,27.5571,0.0],[3,28.9349,0.0],[4,30.3816,0.0]]},
+  {grade:'663',title:'PT-PRESCHOOL ASSISTANT',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'664',title:'PT-PRESCHOOL COORDINATOR',hrs:0,rt:'H',steps:[[1,21.5681,0.0],[2,22.6465,0.0],[3,23.7788,0.0],[4,24.9677,0.0]]},
+  {grade:'665',title:'PT-PRESCHOOL INSTRUCTOR',hrs:0,rt:'H',steps:[[1,18.6322,0.0],[2,19.563,0.0],[3,20.5411,0.0],[4,21.5681,0.0]]},
+  {grade:'667',title:'PT-REC. COORDINATOR',hrs:0,rt:'H',steps:[[1,28.0163,0.0],[2,29.4175,0.0],[3,30.888,0.0],[4,32.4328,0.0],[5,34.0541,0.0]]},
+  {grade:'669',title:'PT-REC. LEADER I',hrs:0,rt:'H',steps:[[1,16.9,0.0],[2,17.745,0.0],[3,18.6322,0.0],[4,19.563,0.0]]},
+  {grade:'670',title:'PT-REC. LEADER II',hrs:0,rt:'H',steps:[[1,18.6322,0.0],[2,19.563,0.0],[3,20.5411,0.0],[4,21.5681,0.0]]},
+  {grade:'672',title:'PT-REC. SPECIALIST I',hrs:0,rt:'H',steps:[[1,19.563,0.0],[2,20.5411,0.0],[3,21.5681,0.0],[4,22.6466,0.0]]},
+  {grade:'674',title:'PT-REC. SPECIALIST II',hrs:0,rt:'H',steps:[[1,21.5681,0.0],[2,22.6466,0.0],[3,23.7789,0.0],[4,24.9677,0.0]]},
+  {grade:'675',title:'PT-REC. SPECIALIST III',hrs:0,rt:'H',steps:[[1,23.7789,0.0],[2,24.9677,0.0],[3,26.216,0.0],[4,27.5268,0.0]]},
+  {grade:'676',title:'PT-REC. SPECIALIST IV',hrs:0,rt:'H',steps:[[1,26.216,0.0],[2,27.5268,0.0],[3,28.903,0.0],[4,30.3481,0.0]]},
+  {grade:'678',title:'PT-RESERVE FIREFIGHTER',hrs:0,rt:'H',steps:[[1,16.9,0.0]]},
+  {grade:'682',title:'PT-RESERVE POLICE OFC III',hrs:0,rt:'H',steps:[[1,47.407,0.0]]},
+  {grade:'680',title:'PT-RESERVE POLICE OFCR I',hrs:0,rt:'H',steps:[[1,47.407,0.0]]},
+  {grade:'681',title:'PT-RESERVE POLICE OFCR II',hrs:0,rt:'H',steps:[[1,47.407,0.0]]},
+  {grade:'683',title:'PT-RSRV POLICE OFC I/TECO',hrs:0,rt:'H',steps:[[1,47.407,0.0]]},
+  {grade:'686',title:'PT-SENIOR MNGMNT ANALYST',hrs:0,rt:'H',steps:[[1,43.777,0.0],[2,45.9663,0.0],[3,48.2645,0.0],[4,50.6777,0.0],[5,53.2116,0.0]]}
+];
+
+// Job Title dropdown (Employee Demographics) shares the same position list as
+// the salary-chart pickers below. Titles are unique across the two charts
+// (PT titles are all prefixed "PT-"), so the plain title text is a safe,
+// human-readable value on its own \u2014 no chart prefix needed.
+const JOB_TITLE_OPTGROUPS = [
+  { label:'Full-Time Positions', options: FT_POSITIONS.map(function(p){ return {value:p.title, label:p.title+' \u2014 Grade '+p.grade}; }) },
+  { label:'Part-Time Positions', options: PT_POSITIONS.map(function(p){ return {value:p.title, label:p.title+' \u2014 Grade '+p.grade}; }) },
+];
+function findPositionByTitle(title){
+  let p = FT_POSITIONS.find(function(x){ return x.title===title; });
+  if(p) return Object.assign({chart:'FT'}, p);
+  p = PT_POSITIONS.find(function(x){ return x.title===title; });
+  if(p) return Object.assign({chart:'PT'}, p);
+  return null;
+}
+
+
+
+// Reference-only tables (Payroll/Finance configuration codes tied to
+// bargaining agreements — not something HR selects when setting up a new
+// hire). Source: Benefit Code Maintenance export provided by HR/Payroll
+// (employer-paid side). Rows marked "Inactive" in that export are excluded.
+// This is a SEPARATE code namespace from the ABT export above — the same
+// code (e.g. K5, H1) can mean something different here than it does on the
+// ABT screen, by design, per Payroll.
+const REF_BENEFIT_CODES = [
+  { g:'AD&D (employer-paid)', rows:[
+    ['A D & D Mid-Mgmt $5,000','D1','$0.09'], ['A D & D DH-Mgmt $5,000','D2','$0.09'],
+    ['A D & D Misc $20,000','D3','$0.35'], ['A D & D Police $50,000','D4','$0.88'],
+    ['A D & D Fire $50,000','D5','$0.88'], ['A D & D PD/NS $20,000','D6','$0.35'],
+    ['A D & D PD/Mgmt $50,000','D7','$0.88'],
+  ]},
+  { g:'Life Insurance (employer-paid)', rows:[
+    ['Life Ins Mid-Mgmt $50,000','L1','$4.50'], ['Life Ins Mgmt $100,000','L2','$9.00'],
+    ['Life Ins Misc $50,000','L3','$2.50'], ['Life Ins Fire $50,000/$25,000','L5','$2.25'],
+    ['Life Ins PD Mgmt $50,000','L7','$4.50'],
+  ]},
+  { g:'GASB 45 (OPEB)', rows:[
+    ['GASB 45 — DH/Mgmt/CC','G1','2.439%'], ['GASB 45 — LVCEA','G2','2.464%'],
+    ['GASB 45 — Fire Union','G3','4.579%'], ['GASB 45 — PD/PD LT','G4','4.579%'],
+  ]},
+  { g:'Other employer-paid benefits', rows:[
+    ['Counseling','CT','$3.00'], ['LTD Long Term Disability','LT','0.35%'], ['Medicare','MD','1.45%'],
+    ['P/T SS Replacement, Deferred (ER)','PT','2.5%'], ['PERS Survivor Benefit','P5','$0.93'],
+    ['Retiree Health Savings','R3','$75.00'], ['Unemployment','UI','0.05%'],
+    ['Workers Comp Insurance','WC','100%'], ['Workers Comp Insurance — Safety','WS','100%'],
+    ['4th Level Survivor — Misc','4M','$3.33'], ['4th Level Survivor — Safety','4S','$3.33'],
+  ]},
+  { g:'Vision (employer-paid)', warn:'This uses a different vendor (Safeguard) than the MetLife Vision plan on the ABT/employee-election screen — confirm which applies before using.', rows:[
+    ['Safeguard Vision — LA Impact','V1','$20.54'],
+  ]},
+  { g:'Employer Health Cost — Dept Head / Mid-Mgmt', rows:[
+    ['HN HMO Cap — Single','N5','$375.00'], ['HN HMO Cap — Couple','N6','$725.00'], ['HN HMO Cap — Emp+Child','N7','$575.00'], ['HN HMO Cap — Family','N8','$1,000.00'],
+    ['HN PPO Cap — Single','H5','$375.00'], ['HN PPO Cap — Couple','H6','$725.00'], ['HN PPO Cap — Emp+Child','H7','$575.00'], ['HN PPO Cap — Family','H8','$1,000.00'],
+    ['Kaiser Cap — Single','B1','$375.00'], ['Kaiser Cap — Couple','B2','$725.00'], ['Kaiser Cap — Emp+Child','B3','$575.00'], ['Kaiser Cap — Family','B4','$1,000.00'],
+  ]},
+  { g:'Employer Health Cost — General / Fire Mid-Mgmt', warn:'Fire Mid-Mgmt (FM) is assigned to these tiers per HR direction — not something confirmed in the Benefit Code export itself.', rows:[
+    ['HN HMO Cap — Single','J5','$325.00'], ['HN HMO Cap — Couple','J6','$575.00'], ['HN HMO Cap — Emp+Child','J7','$475.00'], ['HN HMO Cap — Family','J8','$750.00'],
+    ['HN PPO Cap — Single','O1','$325.00'], ['HN PPO Cap — Couple','O2','$575.00'], ['HN PPO Cap — Emp+Child','O3','$475.00'], ['HN PPO Cap — Family','O4','$750.00'],
+    ['Kaiser Cap — Single','J1','$325.00'], ['Kaiser Cap — Couple','J2','$575.00'], ['Kaiser Cap — Emp+Child','J3','$475.00'], ['Kaiser Cap — Family','J4','$750.00'],
+  ]},
+  { g:'Employer Health Cost — LVFA (Fire)', rows:[
+    ['HN Cap — Single','N1','$300.00'], ['HN Cap — Couple','N2','$500.00'], ['HN Cap — Emp+Child','N3','$400.00'], ['HN Cap — Family','N4','$650.00'],
+    ['Kaiser Cap — Single','K5','$300.00'], ['Kaiser Cap — Couple','K6','$500.00'], ['Kaiser Cap — Emp+Child','K7','$400.00'], ['Kaiser Cap — Family','K8','$650.00'],
+  ]},
+  { g:'Employer Health Cost — POA (Police)', warn:'The export lists no Couple/Emp+Child codes for HN PPO Cap here (same gap as the ABT screen) — confirm with Payroll if those exist.', rows:[
+    ['HN HMO Cap — Single','I1','$405.81'], ['HN HMO Cap — Couple','I2','$725.00'], ['HN HMO Cap — Emp+Child','I3','$575.00'], ['HN HMO Cap — Family','I4','$1,000.00'],
+    ['HN PPO Cap — Single','I9','$405.81'], ['HN PPO Cap — Family','O5','$1,000.00'],
+    ['Kaiser Cap — Single','I5','$405.81'], ['Kaiser Cap — Couple','I6','$725.00'], ['Kaiser Cap — Emp+Child','I7','$575.00'], ['Kaiser Cap — Family','I8','$1,000.00'],
+  ]},
+  { g:'Employer Health Cost — No Cap (Non-Capped)', rows:[
+    ['HN HMO — Single','H1','$458.65'], ['HN HMO — Couple','H2','$1,100.74'], ['HN HMO — Emp+Child','H3','$802.61'], ['HN HMO — Family','H4','$1,398.85'],
+    ['Kaiser — Single','K1','$405.81'], ['Kaiser — Couple','K2','$973.93'], ['Kaiser — Emp+Child','K3','$710.16'], ['Kaiser — Family','K4','$1,237.71'],
+  ]},
+];
+
+const REF_PERS_EMPLOYEE_RATES = [
+  ['PERS Employee Cont — DH/MM Sworn','PF','9%'], ['PERS Employee Cont — Misc Full','PM','8%'],
+  ['PERS Employee Cont — Safety Full','PS','9%'], ['PERS Employee Fire PEPRA','SF','13.75%'],
+  ['PERS Employee Misc PEPRA','MP','7.75%'], ['PERS Employee PD PEPRA','SP','13.75%'],
+  ['PERS Employee Cont — F.D. (9%)','P9','9%'], ['PERS Employee Cont — DH/MM','PG','8%'],
+  ['PERS Employee Cont — PD M/M','PL','9%'], ['PERS Employee Contrib — F.D.','PE','9%'],
+  ['PERS Employee Contrib — PD','PD','9%'], ['PERS Employee Cont — Misc','PC','8%'],
+  ['PERS Buyback','PB','—'], ['Retro Employee PERS Contribution','RP','—'],
+];
+// Note: the Benefit Code export's own employee-side PERS codes (PG, P1, PF,
+// P2, PL, R1) are all marked Inactive there — current employee contribution
+// codes live on the ABT screen (above), which matches this table.
+
+const REF_PERS_EMPLOYER_RATES = [
+  ['PERS Employer — Misc','P3','13.16%'], ['PERS Employer — Safety','P4','26.42%'],
+  ['PERS Employer — Safety (alt.)','PD','25.42%'],
+  ['PERS Employer — Fire PEPRA','SF','13.91%'], ['PERS Employer — Misc PEPRA','MP','7.93%'],
+  ['PERS Employer — PD PEPRA','SP','13.91%'], ['PERS Unfunded — Safety','PV','13.019%'],
+  ['PERS Unfunded — Misc','PU','8.932%'], ['PERS Unfunded PEPRA — Misc','PW','8.932%'],
+  ['PERS Unfunded PEPRA — Fire','PX','13.019%'], ['PERS Unfunded PEPRA — PD','PY','13.019%'],
+  ['POB City — Misc','P7','12.789%'], ['POB City — Safety','P6','18.603%'],
+  ['PERS Retro Employer','P9','—'],
+];
+// Note: the export lists two different "Safety" employer rates — P4 at
+// 26.42% and PD at 25.42% — with no indication of which bargaining group
+// each applies to. Shown here rather than guessed; confirm with Payroll.
+
+
+/* =========================================================================
+   FORM SCHEMA
+   Declarative field lists per section. The renderer below turns each field
+   into markup; a handful of sections (percent distribution, health/dental/
+   vacation cascades, emergency contacts, relationships, direct deposit) are
+   custom-rendered because they don't fit a flat field list.
+   ========================================================================= */
+
+function opts(list){ return list.map(function(o){ return {value:o.v, label:o.l}; }); }
+
+const SECTIONS = [
+  { id:'demographics', title:'Employee Demographics', desc:'Personal and contact information for the new hire.',
+    fields:[
+      {id:'ssn', label:'Social Security Number', type:'text', required:true, placeholder:'XXX-XX-XXXX', pattern:'^\\d{3}-\\d{2}-\\d{4}$', mask:'ssn', hint:'Format: 123-45-6789'},
+      {id:'title', label:'Job Title', type:'select', required:true, optgroups:JOB_TITLE_OPTGROUPS, span2:true, hint:'This is the same list used for the position/rate lookup on the Position & Employment and Pay Setup tabs \u2014 picking it here fills in there too.'},
+      {id:'lastName', label:'Last Name', type:'text', required:true},
+      {id:'firstName', label:'First Name', type:'text', required:true},
+      {id:'mi', label:'Middle Initial', type:'text', maxlen:1},
+      {id:'address', label:'Street Address', type:'text', required:true, span2:true},
+      {id:'city', label:'City', type:'text', required:true},
+      {id:'state', label:'State', type:'select', required:true, options:opts(CODES.usStates)},
+      {id:'zip', label:'ZIP Code', type:'text', required:true, pattern:'^\\d{5}(-\\d{4})?$'},
+      {id:'homePhone', label:'Phone Number', type:'tel', placeholder:'(909) 555-0100', mask:'phone', pattern:'^\\(\\d{3}\\) \\d{3}-\\d{4}$'},
+      {id:'cellPhone', label:'Cell Phone Number', type:'tel', placeholder:'(909) 555-0100', mask:'phone', pattern:'^\\(\\d{3}\\) \\d{3}-\\d{4}$'},
+      {id:'sex', label:'Sex', type:'select', required:true, options:opts(CODES.sex)},
+      {id:'maritalStatusPersonal', label:'Marital Status', type:'select', required:true, options:opts(CODES.maritalStatusPersonal)},
+      {id:'dob', label:'Date of Birth', type:'date', required:true},
+      {id:'stateOfBirth', label:'State of Birth', type:'select', options:opts(CODES.usStates)},
+      {id:'confidential', label:'Confidential Record', type:'select', required:true, options:opts(CODES.confidential)},
+      {id:'userId', label:'User ID', type:'text', hint:'Leave blank if IT assigns this'},
+      {id:'email', label:'Work Email Address', type:'email'},
+    ]
+  },
+  { id:'position', title:'Position & Employment', desc:'Authorized vs. actual position, department, dates, and schedule.',
+    fields:[
+      {id:'authNumber', label:'Authorization / Position #', type:'text', hint:'Optional — budget authorization number, if your department tracks one'},
+      {id:'authDept', label:'Authorized Dept / Div / Account', type:'select', required:true, options:opts(AUTH_DEPT_SIMPLE), hint:'Identifies which department the position is in.'},
+      {id:'actualPosition', label:'Actual Position', type:'text', hint:'If different from authorized'},
+      {id:'actualDept', label:'Actual Dept / Div / Account', type:'select', optgroups:DEPT_ACCOUNT_OPTGROUPS, hint:'If different from authorized. \u26A0\uFE0F marks special/restricted or CIP funds \u2014 valid for specially funded positions.'},
+      {id:'employeeStatus', label:'Employee Status', type:'select', required:true, options:opts(CODES.employeeStatus)},
+      {id:'fullPartTime', label:'Full-Time / Part-Time', type:'select', required:true, options:opts(CODES.fullPartTime)},
+      {id:'dateOfHire', label:'Date of Hire', type:'date', required:true},
+      {id:'totalServiceDate', label:'Total Service Date', type:'date'},
+      {id:'longevityDate', label:'Longevity Date (orig. DOH)', type:'date'},
+      {id:'payFrequency', label:'Pay Frequency', type:'select', required:true, options:opts(CODES.payFrequency)},
+      {id:'scheduledHours', label:'Scheduled Hours Code', type:'select', required:true, options:opts(CODES.scheduledHours)},
+    ],
+    prependCustom:'positionTitlePicker',
+    appendCustom:'percentDist'
+  },
+  { id:'pay', title:'Pay Setup', desc:'Look up the position on the current salary chart to fill in the rate automatically, then set overtime status.',
+    fields:[
+      {id:'hourlySalaried', label:'Hourly / Salaried', type:'select', required:true, options:opts(CODES.hourlySalaried)},
+      {id:'exemptOT', label:'Exempt from Overtime', type:'select', required:true, options:opts(CODES.yesNo)},
+      {id:'startOTHours', label:'Start of Overtime Hours', type:'text', hint:'e.g. after 40 hrs/week'},
+      {id:'otHoursCode', label:'Overtime Hours Code', type:'text'},
+      {id:'hoursPerYear', label:'Hours Worked per Year', type:'select', options:opts(CODES.hoursWorkedPerYear)},
+      {id:'hourlyBaseRate', label:'Hourly Base Rate', type:'number', step:'0.0001', prefix:'$', hint:'For salaried positions, auto-calculated as annual \u00f7 hours worked per year.'},
+      {id:'annualBaseRate', label:'Annual Base Rate', type:'number', step:'0.01', prefix:'$'},
+      {id:'altHourlyRate', label:'Alternate Hourly Rate', type:'number', step:'0.0001', prefix:'$', hint:'Optional'},
+      {id:'otRateOverride', label:'Overtime Rate Override', type:'number', step:'0.0001', prefix:'$', hint:'Optional'},
+    ],
+    prependCustom: 'positionPicker'
+  },
+  { id:'classification', title:'Classification Codes', desc:'Workers\u2019 comp, EEO reporting, bargaining group, and retirement plan.',
+    fields:[
+      {id:'workersComp', label:'Workers\u2019 Comp Code', type:'select', required:true, options:opts(CODES.workersComp)},
+      {id:'eeoFunction', label:'EEO-4 Function Code', type:'select', required:true, options:opts(CODES.eeoFunction)},
+      {id:'eeoCategory', label:'EEO-4 Category Code', type:'select', required:true, options:opts(CODES.eeoCategory)},
+      {id:'groupPlan', label:'Group / Bargaining Plan', type:'select', required:true, options:opts(CODES.groupPlan)},
+      {id:'retirementPlan', label:'Retirement Plan', type:'select', required:true, options:CODES.retirementPlan.map(function(o){return {value:fieldCode(o),label:o.l};})},
+      {id:'calpersId', label:'CalPERS I.D.', type:'text', hint:'If already enrolled with PERS'},
+      {id:'ethnicCode', label:'Ethnic Code', type:'select', options:opts(CODES.ethnicCode), hint:'Voluntary, for EEO reporting'},
+      {id:'usCitizen', label:'U.S. Citizen', type:'select', required:true, options:opts(CODES.yesNo)},
+      {id:'limitedEnglish', label:'Limited English Proficiency', type:'select', options:opts(CODES.yesNo)},
+      {id:'veteran', label:'Veteran', type:'select', options:opts(CODES.yesNo)},
+    ]
+  },
+  { id:'credentials', title:'Review, Education & Credentials', desc:'Performance review schedule, education, license, and physical.',
+    fields:[
+      {id:'dateNextReview', label:'Date of Next Review', type:'date', required:true},
+      {id:'reviewType', label:'Type of Review', type:'select', required:true, options:opts(CODES.reviewType)},
+      {id:'checkLocationCode', label:'Check Location Code', type:'text'},
+      {id:'education', label:'Education', type:'select', options:opts(CODES.education)},
+      {id:'collegeCredits', label:'Number of College Credits', type:'number'},
+      {id:'licenseType', label:'Driver\u2019s License Type', type:'select', options:opts(CODES.licenseType)},
+      {id:'licenseNumber', label:'License Number', type:'text'},
+      {id:'licenseExpiration', label:'License Expiration', type:'date'},
+      {id:'drugPool', label:'Drug Testing Pool', type:'select', options:opts(CODES.drugPool)},
+      {id:'workPermit', label:'Work Permit Required', type:'select', options:opts(CODES.yesNo)},
+      {id:'lastPhysical', label:'Date of Last Physical', type:'date'},
+      {id:'height', label:'Height', type:'text', placeholder:'5\'10"'},
+      {id:'weight', label:'Weight', type:'text', placeholder:'175 lbs'},
+      {id:'bloodType', label:'Blood Type', type:'text', placeholder:'O+'},
+    ]
+  },
+  { id:'emergency', title:'Emergency Contacts', desc:'', custom:'emergency' },
+  { id:'accrual', title:'Leave Accrual Setup', desc:'Comp time, sick leave, and vacation accrual codes.', custom:'accrual' },
+  { id:'benefits', title:'Additional Pay & Benefit Elections', desc:'Extra pays, and the employee\u2019s health / dental / vision elections.', custom:'benefits' },
+  { id:'tax', title:'Tax Withholding', desc:'State (DE-4) and Federal (W-4) withholding elections.', custom:'tax' },
+  { id:'relationships', title:'Employee Relationships', desc:'Disclosure of relatives employed by the City (nepotism policy).', custom:'relationships' },
+  { id:'directdeposit', title:'Direct Deposit', desc:'Bank account(s) for payroll deposit.', custom:'directdeposit' },
+  { id:'review', title:'Review & Submit', desc:'', custom:'review' },
+];
+
+/* =========================================================================
+   STATE
+   ========================================================================= */
+const state = {
+  data: { state: 'CA' },  // flat field values, keyed by field id (state defaults to CA)
+  percentDist: [ {account:'', pct:''} ],
+  emergency: { p_name:'', p_rel:'', p_phone:'', p_phone2:'', s_name:'', s_rel:'', s_phone:'', s_phone2:'' },
+  vacation: { group:'', tier:'' },
+  position: { chart:'', grade:'', title:'', step:'', hrs:0, rt:'' },
+  health: { group:'', tier:'' },
+  dental: { group:'', tier:'' },
+  vision: { tier:'' },
+  addPay: [],             // array of selected codes
+  supplemental: [],       // voluntary/supplemental insurance codes
+  fsa: [],                // flexible spending account codes
+  defcomp: [],            // deferred compensation codes
+  deductions: [],         // array of selected codes
+  relationships: [ {name:'', rel:'', dept:''} ],
+  bank1: { bank:'', routing:'', account:'', type:'Checking', method:'full' , amount:''},
+  bank2Enabled: false,
+  bank2: { bank:'', routing:'', account:'', type:'Checking', amount:'' },
+  currentSection: 0,
+  submitted: false,
+};
+
+let currentUser = null; // resolved via user capability, if available
+
+/* =========================================================================
+   HELPERS
+   ========================================================================= */
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function el(html){ const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstElementChild; }
+function fieldCode(o){ return o.code || o.v; }
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+function uid(){ return 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+/* =========================================================================
+   GENERIC FIELD RENDERING
+   ========================================================================= */
+function renderField(f){
+  const val = state.data[f.id] || '';
+  const invalidClass = state.invalidFields && state.invalidFields[f.id] ? ' invalid' : '';
+  let control = '';
+  if(f.type === 'select'){
+    let optsHtml;
+    if(f.optgroups){
+      optsHtml = f.optgroups.map(function(g){
+        return '<optgroup label="'+esc(g.label)+'">' + g.options.map(function(o){
+          return '<option value="'+esc(o.value)+'"'+(val===o.value?' selected':'')+'>'+esc(o.label)+'</option>';
+        }).join('') + '</optgroup>';
+      }).join('');
+    } else {
+      optsHtml = f.options.map(function(o){
+        return '<option value="'+esc(o.value)+'"'+(val===o.value?' selected':'')+'>'+esc(o.label)+'</option>';
+      }).join('');
+    }
+    control = '<select id="f_'+f.id+'" data-field="'+f.id+'">' +
+      '<option value="">Select\u2026</option>' + optsHtml + '</select>';
+  } else if(f.type === 'textarea'){
+    control = '<textarea id="f_'+f.id+'" data-field="'+f.id+'" placeholder="'+esc(f.placeholder||'')+'">'+esc(val)+'</textarea>';
+  } else {
+    const step = f.step ? ' step="'+f.step+'"' : '';
+    const maxlen = f.maxlen ? ' maxlength="'+f.maxlen+'"' : '';
+    const maskAttr = f.mask ? ' data-mask="'+f.mask+'"' : '';
+    control = '<input type="'+(f.type||'text')+'" id="f_'+f.id+'" data-field="'+f.id+'" value="'+esc(val)+'" placeholder="'+esc(f.placeholder||'')+'"'+step+maxlen+maskAttr+'>';
+  }
+  return '<div class="field'+(f.span2?' span-2':'')+invalidClass+'" id="wrap_'+f.id+'">' +
+    '<label for="f_'+f.id+'">'+esc(f.label)+(f.required?' <span class="req">*</span>':'')+'</label>' +
+    control +
+    (f.hint?'<div class="hint">'+esc(f.hint)+'</div>':'') +
+    (f.pattern && state.invalidFields && state.invalidFields[f.id]==='format' ? '<div class="errmsg">Please enter a valid '+esc(f.label.toLowerCase())+' (e.g. '+esc(f.placeholder||'')+').</div>' : '<div class="errmsg">This field is required.</div>') +
+  '</div>';
+}
+
+/* =========================================================================
+   INPUT MASKING (SSN, phone) — formats as the person types, and blocks
+   non-numeric characters so the stored value always matches the field's
+   validation pattern.
+   ========================================================================= */
+function formatSSN(raw){
+  const d = raw.replace(/\D/g,'').slice(0,9);
+  if(d.length <= 3) return d;
+  if(d.length <= 5) return d.slice(0,3)+'-'+d.slice(3);
+  return d.slice(0,3)+'-'+d.slice(3,5)+'-'+d.slice(5);
+}
+function formatPhone(raw){
+  const d = raw.replace(/\D/g,'').slice(0,10);
+  if(d.length === 0) return '';
+  if(d.length < 4) return '('+d;
+  if(d.length < 7) return '('+d.slice(0,3)+') '+d.slice(3);
+  return '('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6);
+}
+const MASKS = { ssn: formatSSN, phone: formatPhone };
+
+function bindGenericFields(container){
+  container.querySelectorAll('[data-field]').forEach(function(node){
+    const id = node.getAttribute('data-field');
+    const evt = (node.tagName === 'SELECT') ? 'change' : 'input';
+    const maskName = node.getAttribute('data-mask');
+    node.addEventListener(evt, function(){
+      if(maskName && MASKS[maskName]){
+        const formatted = MASKS[maskName](node.value);
+        if(formatted !== node.value) node.value = formatted;
+      }
+      state.data[id] = node.value;
+      if(state.invalidFields && state.invalidFields[id]){
+        delete state.invalidFields[id];
+        node.classList.remove('err');
+        const wrap = document.getElementById('wrap_'+id);
+        if(wrap) wrap.classList.remove('invalid');
+      }
+      if(id === 'title'){
+        // Job Title shares state.position with the Position & Employment and
+        // Pay Setup pickers, so choosing it here carries through to both.
+        const p = findPositionByTitle(node.value);
+        if(p){
+          const changed = state.position.title !== p.title;
+          state.position = { chart:p.chart, grade:p.grade, title:p.title, step: changed ? '' : state.position.step, hrs:p.hrs, rt:p.rt };
+          if(changed){
+            state.data.hourlySalaried = ''; state.data.hoursPerYear = ''; state.data.hourlyBaseRate = ''; state.data.annualBaseRate = '';
+          }
+        }
+      }
+    });
+  });
+}
+
+/* =========================================================================
+   CASCADING PICKERS (vacation / health / dental / vision)
+   ========================================================================= */
+function renderCascade(opts){
+  // opts: {id, label, groups, stateObj, warnGlobal}
+  const groups = opts.groups;
+  const cur = opts.stateObj;
+  const groupOpts = groups.map(function(g,i){
+    return '<option value="'+i+'"'+(cur.group===g.g?' selected':'')+'>'+esc(g.g)+'</option>';
+  }).join('');
+  const selGroup = groups.find(function(g){ return g.g === cur.group; });
+  const tierOpts = selGroup ? selGroup.tiers.map(function(t){
+    const amt = t[2] != null ? '  \u2014  $'+t[2].toFixed(2) : '';
+    return '<option value="'+esc(t[1])+'"'+(cur.tier===t[1]?' selected':'')+'>'+esc(t[0])+' \u2014 '+esc(t[1])+amt+'</option>';
+  }).join('') : '';
+  const warn = selGroup && selGroup.warn ? '<div class="warnbox">\u26A0\uFE0F <span>'+esc(selGroup.warn)+'</span></div>' : '';
+  const curTierData = selGroup ? selGroup.tiers.find(function(t){ return t[1]===cur.tier; }) : null;
+  const curAmt = curTierData && curTierData[2] != null ? ' \u2014 $'+curTierData[2].toFixed(2) : '';
+  return '<div class="field span-2">' +
+    '<label>'+esc(opts.label)+(opts.required?' <span class="req">*</span>':'')+'</label>' +
+    '<div class="cascade">' +
+      '<select data-cascade-group="'+opts.id+'"><option value="">Select group\u2026</option>'+groupOpts+'</select>' +
+      '<select data-cascade-tier="'+opts.id+'" '+(selGroup?'':'disabled')+'><option value="">'+(selGroup?'Select tier\u2026':'Select a group first')+'</option>'+tierOpts+'</select>' +
+      (warn ? '<div class="cascade-result" style="grid-column:1/-1">'+warn+'</div>' : '') +
+      (cur.group && cur.tier ? '<div class="cascade-result">Selected code: <b>'+esc(cur.tier)+'</b> \u2014 '+esc(cur.group)+esc(curAmt)+'</div>' : '') +
+    '</div>' +
+  '</div>';
+}
+function bindCascade(container, id, groups, stateObj, rerenderFn){
+  const gSel = container.querySelector('[data-cascade-group="'+id+'"]');
+  const tSel = container.querySelector('[data-cascade-tier="'+id+'"]');
+  if(gSel) gSel.addEventListener('change', function(){
+    const g = groups[parseInt(gSel.value,10)];
+    stateObj.group = g ? g.g : '';
+    stateObj.tier = '';
+    rerenderFn();
+  });
+  if(tSel) tSel.addEventListener('change', function(){ stateObj.tier = tSel.value; rerenderFn(); });
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Emergency Contacts
+   ========================================================================= */
+function renderEmergency(){
+  const e = state.emergency;
+  function relOptions(sel){
+    return '<option value="">Select\u2026</option>' + CODES.relationship.map(function(o){
+      return '<option value="'+o.v+'"'+(sel===o.v?' selected':'')+'>'+esc(o.l)+'</option>';
+    }).join('');
+  }
+  return '<div class="subhead">Primary Contact</div>' +
+  '<div class="grid">' +
+    '<div class="field"><label>Name <span class="req">*</span></label><input data-em="p_name" value="'+esc(e.p_name)+'"></div>' +
+    '<div class="field"><label>Relationship <span class="req">*</span></label><select data-em="p_rel">'+relOptions(e.p_rel)+'</select></div>' +
+    '<div class="field"><label>Phone Number <span class="req">*</span></label><input type="tel" data-em="p_phone" value="'+esc(e.p_phone)+'"></div>' +
+    '<div class="field"><label>Other Phone Number</label><input type="tel" data-em="p_phone2" value="'+esc(e.p_phone2)+'"></div>' +
+  '</div>' +
+  '<div class="subhead">Secondary Contact</div>' +
+  '<div class="grid">' +
+    '<div class="field"><label>Name</label><input data-em="s_name" value="'+esc(e.s_name)+'"></div>' +
+    '<div class="field"><label>Relationship</label><select data-em="s_rel">'+relOptions(e.s_rel)+'</select></div>' +
+    '<div class="field"><label>Phone Number</label><input type="tel" data-em="s_phone" value="'+esc(e.s_phone)+'"></div>' +
+    '<div class="field"><label>Other Phone Number</label><input type="tel" data-em="s_phone2" value="'+esc(e.s_phone2)+'"></div>' +
+  '</div>';
+}
+function bindEmergency(container){
+  container.querySelectorAll('[data-em]').forEach(function(node){
+    const key = node.getAttribute('data-em');
+    const isPhone = key.indexOf('phone') > -1;
+    node.addEventListener(node.tagName==='SELECT'?'change':'input', function(){
+      if(isPhone){
+        const formatted = formatPhone(node.value);
+        if(formatted !== node.value) node.value = formatted;
+      }
+      state.emergency[key] = node.value;
+    });
+  });
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Leave Accrual
+   ========================================================================= */
+function renderAccrual(){
+  const d = state.data;
+  function selectHtml(id, list, val){
+    return '<select id="f_'+id+'" data-field="'+id+'"><option value="">Select\u2026</option>' +
+      list.map(function(o){ return '<option value="'+o.v+'"'+(val===o.v?' selected':'')+'>'+esc(o.l)+'</option>'; }).join('') +
+      '</select>';
+  }
+  let html = '<div class="grid">';
+  html += '<div class="field"><label>Comp Time Balance Code</label>' + selectHtml('compTime', CODES.compTime, d.compTime) + '<div class="hint">Leave blank if not applicable to this position</div></div>';
+  html += '<div class="field"><label>Eligible for On-Call Court Comp Time</label>' + '<select id="f_onCallComp" data-field="onCallComp"><option value="">Select\u2026</option><option value="Y"'+(d.onCallComp==='Y'?' selected':'')+'>Yes</option><option value="N"'+(d.onCallComp==='N'?' selected':'')+'>No</option></select></div>';
+  html += '<div class="field"><label>Sick Leave Accrual Code <span class="req">*</span></label>' + selectHtml('sickLeave', CODES.sickLeave, d.sickLeave) + '</div>';
+  html += '</div>';
+  html += renderCascade({id:'vacation', label:'Vacation Accrual (group \u2192 years of service)', required:true, groups:VACATION_GROUPS, stateObj:state.vacation});
+  return html;
+}
+function bindAccrual(container){
+  bindGenericFields(container);
+  bindCascade(container, 'vacation', VACATION_GROUPS, state.vacation, function(){ renderCurrentSection(); });
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Additional Pay & Benefits
+   ========================================================================= */
+function renderCheckGroup(name, groups, selected){
+  return '<div class="check-groups">' + groups.map(function(grp){
+    return '<div>'+(grp.g?'<div class="check-group-title">'+esc(grp.g)+'</div>':'')+'<div class="check-grid">' +
+      grp.items.map(function(it){
+        const code = fieldCode(it);
+        const checked = selected.indexOf(it.v) > -1 ? ' checked' : '';
+        const amt = it.amt != null ? ' \u2014 $'+it.amt.toFixed(2) : (it.pct != null ? ' \u2014 '+it.pct+'%' : '');
+        return '<label class="checkitem"><input type="checkbox" data-checkgroup="'+name+'" value="'+esc(it.v)+'"'+checked+'> ' +
+          '<span>'+esc(it.l)+' <span style="color:var(--muted); font-family:ui-monospace,monospace; font-size:12px;">('+esc(code)+esc(amt)+')</span>' +
+          (it.warn ? ' <span class="flag" title="'+esc(it.warn)+'">\u26A0\uFE0F</span>' : '') + '</span></label>';
+      }).join('') + '</div></div>';
+  }).join('') + '</div>';
+}
+function renderBenefits(){
+  let html = '<div class="subhead">Additional Pay</div>';
+  html += '<div class="hint" style="margin-bottom:12px;">Check every additional pay that applies to this employee. Items marked \u26A0\uFE0F have a data discrepancy in the source export \u2014 confirm with Payroll before relying on them.</div>';
+  html += renderCheckGroup('addPay', ADD_PAY_GROUPS, state.addPay);
+
+  html += '<div class="subhead">Health Plan</div>';
+  html += '<div class="grid">' + renderCascade({id:'health', label:'Health plan election', groups:HEALTH_GROUPS, stateObj:state.health}) + '</div>';
+
+  html += '<div class="subhead">Dental Plan</div>';
+  html += '<div class="grid">' + renderCascade({id:'dental', label:'Dental plan election', groups:DENTAL_GROUPS, stateObj:state.dental}) + '</div>';
+
+  html += '<div class="subhead">Vision Plan</div>';
+  const vt = VISION_PLAN.tiers.map(function(t){
+    return '<option value="'+t[1]+'"'+(state.vision.tier===t[1]?' selected':'')+'>'+esc(t[0])+' \u2014 '+esc(t[1])+'  \u2014  $'+t[2].toFixed(2)+'</option>';
+  }).join('');
+  html += '<div class="grid"><div class="field"><label>MetLife Vision</label><select data-vision><option value="">Not enrolled\u2026</option>'+vt+'</select></div></div>';
+
+  html += '<div class="subhead">Voluntary / Supplemental Insurance</div>';
+  html += renderCheckGroup('supplemental', SUPPLEMENTAL_GROUPS, state.supplemental);
+
+  html += '<div class="subhead">Flexible Spending Account</div>';
+  html += renderCheckGroup('fsa', [FSA_GROUP], state.fsa);
+
+  html += '<div class="subhead">Deferred Compensation</div>';
+  html += renderCheckGroup('defcomp', DEFCOMP_GROUPS, state.defcomp);
+
+  html += '<div class="subhead">Other Voluntary Deductions</div>';
+  html += renderCheckGroup('deductions', [{g:'', items:CODES.deduction}], state.deductions);
+
+  return html + renderRefBoxes();
+}
+function renderRefBoxes(){
+  let html = '<details class="refbox" style="margin-top:20px; border-color:var(--border); box-shadow:none;">' +
+    '<summary>Reference: Employer Benefit Codes (Payroll/Finance use) <span class="chev">\u25B8</span></summary>' +
+    '<div class="refbody"><input type="search" placeholder="Filter by name or code\u2026" data-reffilter="benefit">' +
+    '<table class="reftable" data-reftable="benefit"><thead><tr><th>Item</th><th>Code</th><th>Amount / Rate</th></tr></thead><tbody>';
+  REF_BENEFIT_CODES.forEach(function(grp){
+    html += '<tr class="ref-group-row"><td colspan="3">'+esc(grp.g)+(grp.warn?' \u26A0\uFE0F':'')+'</td></tr>';
+    if(grp.warn) html += '<tr><td colspan="3" style="padding-top:0;"><div class="warnbox" style="margin:2px 0 8px;">\u26A0\uFE0F <span>'+esc(grp.warn)+'</span></div></td></tr>';
+    grp.rows.forEach(function(r){ html += '<tr data-search="'+esc((r[0]+' '+r[1]).toLowerCase())+'"><td>'+esc(r[0])+'</td><td class="code">'+esc(r[1])+'</td><td>'+esc(r[2]||'')+'</td></tr>'; });
+  });
+  html += '</tbody></table><div class="hint" style="margin-top:10px;">From the Benefit Code Maintenance export (employer-paid side) \u2014 a separate code namespace from the ABT/employee-election screen above, per Payroll. Inactive rows excluded.</div></div></details>';
+
+  html += '<details class="refbox" style="margin-top:12px; border-color:var(--border); box-shadow:none;">' +
+    '<summary>Reference: PERS Contribution Rates <span class="chev">\u25B8</span></summary>' +
+    '<div class="refbody"><div class="check-group-title" style="margin-top:4px;">Employee-paid (ABT export)</div><table class="reftable"><thead><tr><th>Item</th><th>Code</th><th>Rate</th></tr></thead><tbody>' +
+    REF_PERS_EMPLOYEE_RATES.map(function(r){ return '<tr><td>'+esc(r[0])+'</td><td class="code">'+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>'; }).join('') +
+    '</tbody></table><div class="check-group-title" style="margin-top:14px;">Employer-paid (Benefit Code export)</div><table class="reftable"><thead><tr><th>Item</th><th>Code</th><th>Rate</th></tr></thead><tbody>' +
+    REF_PERS_EMPLOYER_RATES.map(function(r){ return '<tr><td>'+esc(r[0])+'</td><td class="code">'+esc(r[1])+'</td><td>'+esc(r[2])+'</td></tr>'; }).join('') +
+    '</tbody></table><div class="warnbox" style="margin-top:10px;">\u26A0\uFE0F <span>The employer-paid export lists two different "Safety" rates (P4 at 26.42% and PD at 25.42%) with no indication of which bargaining group each applies to \u2014 confirm with Payroll.</span></div>' +
+    '<div class="hint" style="margin-top:8px;">Reference only \u2014 Payroll applies the correct current rate based on the employee\u2019s retirement plan and hire date.</div></div></details>';
+  return html;
+}
+function bindRefBoxes(container){
+  container.querySelectorAll('[data-reffilter]').forEach(function(input){
+    input.addEventListener('input', function(){
+      const q = input.value.toLowerCase();
+      const table = container.querySelector('[data-reftable="'+input.getAttribute('data-reffilter')+'"]');
+      if(!table) return;
+      table.querySelectorAll('tbody tr[data-search]').forEach(function(tr){
+        tr.style.display = tr.getAttribute('data-search').indexOf(q) > -1 ? '' : 'none';
+      });
+    });
+  });
+}
+function bindBenefits(container){
+  container.querySelectorAll('[data-checkgroup]').forEach(function(node){
+    node.addEventListener('change', function(){
+      const key = node.getAttribute('data-checkgroup');
+      const arr = state[key];
+      const v = node.value;
+      const idx = arr.indexOf(v);
+      if(node.checked && idx === -1) arr.push(v);
+      if(!node.checked && idx > -1) arr.splice(idx,1);
+    });
+  });
+  bindCascade(container, 'health', HEALTH_GROUPS, state.health, function(){ renderCurrentSection(); });
+  bindCascade(container, 'dental', DENTAL_GROUPS, state.dental, function(){ renderCurrentSection(); });
+  const visionSel = container.querySelector('[data-vision]');
+  if(visionSel) visionSel.addEventListener('change', function(){ state.vision.tier = visionSel.value; });
+  bindRefBoxes(container);
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Tax Withholding
+   ========================================================================= */
+function renderTax(){
+  const d = state.data;
+  function sel(id, list, required){
+    const v = d[id]||'';
+    return '<select id="f_'+id+'" data-field="'+id+'">'+ '<option value="">Select\u2026</option>' +
+      list.map(function(o){ return '<option value="'+o.v+'"'+(v===o.v?' selected':'')+'>'+esc(o.l)+'</option>'; }).join('') + '</select>';
+  }
+  function txt(id, type, placeholder, prefix){
+    type = type || 'text';
+    return '<input type="'+type+'" id="f_'+id+'" data-field="'+id+'" value="'+esc(d[id]||'')+'" placeholder="'+esc(placeholder||'')+'">';
+  }
+  let html = '<div class="subhead">State Withholding (DE-4)</div><div class="grid">';
+  html += '<div class="field"><label>Marital Status <span class="req">*</span></label>'+sel('stMaritalStatus', CODES.stateMaritalStatus)+'</div>';
+  html += '<div class="field"><label>Number of Dependents</label>'+txt('stDependents','number')+'</div>';
+  html += '<div class="field"><label>Additional Amount</label>'+txt('stAddlAmount','number','0.00')+'</div>';
+  html += '<div class="field"><label>Additional Percentage</label>'+txt('stAddlPercent','number','0')+'</div>';
+  html += '<div class="field"><label>Exempt</label>'+sel('stExempt', CODES.yesNo)+'</div>';
+  html += '</div>';
+
+  html += '<div class="subhead">Federal Withholding (W-4)</div><div class="grid">';
+  html += '<div class="field span-2"><label>Filing Status <span class="req">*</span></label>'+sel('fedFilingStatus', CODES.federalFilingStatus)+'</div>';
+  html += '<div class="field"><label>Multiple Jobs / Spouse Works</label>'+sel('fedMultipleJobs', CODES.yesNo)+'</div>';
+  html += '<div class="field"><label>Qualifying Children Under 17 (\u00d7 $2,000)</label>'+txt('fedChildren','number','0')+'</div>';
+  html += '<div class="field"><label>Other Dependents (\u00d7 $500)</label>'+txt('fedOtherDependents','number','0')+'</div>';
+  html += '<div class="field"><label>Other Income (not from jobs)</label>'+txt('fedOtherIncome','number','0.00')+'</div>';
+  html += '<div class="field"><label>Deductions</label>'+txt('fedDeductions','number','0.00')+'</div>';
+  html += '<div class="field"><label>Extra Withholding per Pay Period</label>'+txt('fedAddlAmount','number','0.00')+'</div>';
+  html += '<div class="field"><label>Exempt from Withholding</label>'+sel('fedExempt', CODES.yesNo)+'</div>';
+  html += '</div>';
+
+  html += '<div class="subhead">Medicare</div>';
+  html += '<div class="hint">Fixed system code: <b style="font-family:ui-monospace,monospace;">MC</b> \u2014 no entry needed.</div>';
+  return html;
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Percent / Expense Distribution (repeatable, inside Position)
+   ========================================================================= */
+/* =========================================================================
+   CUSTOM SECTION: Position title picker (Position & Employment tab)
+   Shares state.position with the Pay Setup picker below, so choosing the
+   title here carries straight through — Pay Setup then only needs a step.
+   ========================================================================= */
+function renderPositionTitlePicker(){
+  const pos = state.position;
+  const ftOpts = FT_POSITIONS.map(function(p){
+    return '<option value="FT|'+esc(p.title)+'"'+(pos.chart==='FT'&&pos.title===p.title?' selected':'')+'>'+esc(p.title)+' (Grade '+esc(p.grade)+')</option>';
+  }).join('');
+  const ptOpts = PT_POSITIONS.map(function(p){
+    return '<option value="PT|'+esc(p.title)+'"'+(pos.chart==='PT'&&pos.title===p.title?' selected':'')+'>'+esc(p.title)+' (Grade '+esc(p.grade)+')</option>';
+  }).join('');
+  let html = '<div class="subhead">Authorized Position</div>';
+  html += '<div class="grid"><div class="field span-2">' +
+    '<label>Position <span class="req">*</span></label>' +
+    '<select id="posTitleSelect"><option value="">Select position\u2026</option>' +
+      '<optgroup label="Full-Time Positions">'+ftOpts+'</optgroup>' +
+      '<optgroup label="Part-Time Positions">'+ptOpts+'</optgroup>' +
+    '</select>' +
+    (pos.title ? '<div class="hint">Grade '+esc(pos.grade)+' \u2014 you\u2019ll pick the step on the Pay Setup tab, where the rate fills in automatically.</div>' : '<div class="hint">This also drives the rate lookup on the Pay Setup tab.</div>') +
+  '</div></div>';
+  return html;
+}
+function bindPositionTitlePicker(container){
+  const sel = container.querySelector('#posTitleSelect');
+  if(!sel) return;
+  sel.addEventListener('change', function(){
+    if(!sel.value){
+      state.position = {chart:'',grade:'',title:'',step:'',hrs:0,rt:''};
+      state.data.title = '';
+    } else {
+      const parts = sel.value.split('|');
+      const chart = parts[0], title = parts.slice(1).join('|');
+      const p = findPosition(chart, title);
+      const changed = state.position.chart !== chart || state.position.title !== title;
+      state.position = { chart:chart, grade:p.grade, title:p.title, step: changed ? '' : state.position.step, hrs:p.hrs, rt:p.rt };
+      state.data.title = p.title;
+      if(changed){
+        // clear any pay figures pulled from a previous position so nothing stale carries over
+        state.data.hourlySalaried = ''; state.data.hoursPerYear = ''; state.data.hourlyBaseRate = ''; state.data.annualBaseRate = '';
+      }
+    }
+    renderCurrentSection();
+  });
+}
+
+function allPositions(){
+  return FT_POSITIONS.map(function(p){ return Object.assign({chart:'FT'}, p); })
+    .concat(PT_POSITIONS.map(function(p){ return Object.assign({chart:'PT'}, p); }));
+}
+function findPosition(chart, title){
+  const list = chart === 'FT' ? FT_POSITIONS : PT_POSITIONS;
+  return list.find(function(p){ return p.title === title; });
+}
+function renderPositionPicker(){
+  const pos = state.position;
+  const ftOpts = FT_POSITIONS.map(function(p){
+    return '<option value="FT|'+esc(p.title)+'"'+(pos.chart==='FT'&&pos.title===p.title?' selected':'')+'>'+esc(p.title)+' (Grade '+esc(p.grade)+')</option>';
+  }).join('');
+  const ptOpts = PT_POSITIONS.map(function(p){
+    return '<option value="PT|'+esc(p.title)+'"'+(pos.chart==='PT'&&pos.title===p.title?' selected':'')+'>'+esc(p.title)+' (Grade '+esc(p.grade)+')</option>';
+  }).join('');
+  const current = pos.title ? findPosition(pos.chart, pos.title) : null;
+  const stepOpts = current ? current.steps.map(function(s){
+    const amt = current.rt === 'A' ? '$'+s[2].toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'/yr' : '$'+s[1].toFixed(4)+'/hr';
+    return '<option value="'+s[0]+'"'+(pos.step===String(s[0])?' selected':'')+'>Step '+s[0]+' \u2014 '+amt+'</option>';
+  }).join('') : '';
+  let html = '<div class="subhead">Position (from current salary chart)</div>';
+  html += '<div class="cascade" style="margin-bottom:6px;">' +
+    '<select id="posSelect"><option value="">Select position\u2026</option>' +
+      '<optgroup label="Full-Time Positions">'+ftOpts+'</optgroup>' +
+      '<optgroup label="Part-Time Positions">'+ptOpts+'</optgroup>' +
+    '</select>' +
+    '<select id="posStepSelect" '+(current?'':'disabled')+'><option value="">'+(current?'Select step\u2026':'Select a position first')+'</option>'+stepOpts+'</select>';
+  if(current && pos.step){
+    const stepData = current.steps.find(function(s){ return String(s[0])===pos.step; });
+    const rateStr = current.rt === 'A'
+      ? '$'+stepData[2].toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})+'/yr (salaried)'+(current.hrs>0?' \u2014 $'+(Math.round((stepData[2]/current.hrs)*10000)/10000).toFixed(4)+'/hr equiv.':'')
+      : '$'+stepData[1].toFixed(4)+'/hr (hourly)';
+    html += '<div class="cascade-result" style="grid-column:1/-1;">Grade <b>'+esc(current.grade)+'</b> \u2014 '+esc(current.title)+', Step '+esc(pos.step)+' \u2014 '+rateStr+
+      (pos.chart==='FT' ? ' \u2014 '+current.hrs.toLocaleString()+' hrs/yr' : '') + '</div>';
+  }
+  html += '</div>';
+  html += '<div class="hint">Full-time rates are from the FT Salary Chart effective July 12, 2026; part-time rates are from the PT Salary Chart effective January 11, 2026. If the position isn\u2019t on either chart, leave this blank and enter the rate manually below.</div>';
+  return html;
+}
+function applyPositionToFields(){
+  const pos = state.position;
+  const current = pos.title ? findPosition(pos.chart, pos.title) : null;
+  if(!current || !pos.step) return;
+  const stepData = current.steps.find(function(s){ return String(s[0])===pos.step; });
+  if(!stepData) return;
+  state.data.hourlySalaried = current.rt === 'A' ? 'S' : 'H';
+  if(pos.chart === 'FT') state.data.hoursPerYear = String(current.hrs);
+  if(current.rt === 'A'){
+    state.data.annualBaseRate = stepData[2];
+    state.data.hourlyBaseRate = (current.hrs > 0) ? Math.round((stepData[2] / current.hrs) * 10000) / 10000 : '';
+  } else {
+    state.data.hourlyBaseRate = stepData[1];
+    state.data.annualBaseRate = '';
+  }
+}
+function bindPositionPicker(container){
+  const posSel = container.querySelector('#posSelect');
+  const stepSel = container.querySelector('#posStepSelect');
+  if(posSel) posSel.addEventListener('change', function(){
+    if(!posSel.value){ state.position = {chart:'',grade:'',title:'',step:'',hrs:0,rt:''}; renderCurrentSection(); return; }
+    const parts = posSel.value.split('|');
+    const chart = parts[0], title = parts.slice(1).join('|');
+    const p = findPosition(chart, title);
+    state.position = { chart:chart, grade:p.grade, title:p.title, step:'', hrs:p.hrs, rt:p.rt };
+    renderCurrentSection();
+  });
+  if(stepSel) stepSel.addEventListener('change', function(){
+    state.position.step = stepSel.value;
+    applyPositionToFields();
+    renderCurrentSection();
+  });
+}
+
+function renderPercentDist(){
+  const rows = state.percentDist;
+  const total = rows.reduce(function(s,r){ return s + (parseFloat(r.pct)||0); }, 0);
+  let html = '<div class="subhead">Percent / Expense Distribution</div>';
+  html += '<div class="hint" style="margin-bottom:8px;">Split this position\u2019s cost across accounts. Percentages should add to 100%.</div>';
+  rows.forEach(function(r, i){
+    html += '<div class="repeat-row" data-pdrow="'+i+'">' +
+      '<div class="field"><label style="'+(i>0?'opacity:0; height:0; margin:0;':'')+'">Account</label><select data-pd="account" data-i="'+i+'"><option value="">Select account\u2026</option>'+DEPT_ACCOUNT_OPTGROUPS.map(function(g){return '<optgroup label="'+esc(g.label)+'">'+g.options.map(function(o){return '<option value="'+esc(o.value)+'"'+(r.account===o.value?' selected':'')+'>'+esc(o.label)+'</option>';}).join('')+'</optgroup>';}).join('')+'</select></div>' +
+      '<div class="field"><label style="'+(i>0?'opacity:0; height:0; margin:0;':'')+'">Percent</label><input data-pd="pct" data-i="'+i+'" type="number" step="0.01" value="'+esc(r.pct)+'" placeholder="%"></div>' +
+      (rows.length>1 ? '<button type="button" class="rowbtn" data-pdremove="'+i+'" title="Remove row">\u2715</button>' : '<div></div>') +
+    '</div>';
+  });
+  html += '<button type="button" class="addrow-btn" id="pdAddRow">+ Add another account line</button>';
+  html += '<div class="sum-indicator '+(Math.abs(total-100)<0.01?'ok':'bad')+'">Total: '+total.toFixed(2)+'%'+(Math.abs(total-100)<0.01?' \u2713':' \u2014 should equal 100%')+'</div>';
+  return html;
+}
+function bindPercentDist(container){
+  container.querySelectorAll('[data-pd]').forEach(function(node){
+    const evt = node.tagName === 'SELECT' ? 'change' : 'input';
+    node.addEventListener(evt, function(){
+      const i = parseInt(node.getAttribute('data-i'),10);
+      const key = node.getAttribute('data-pd');
+      state.percentDist[i][key] = node.value;
+      const total = state.percentDist.reduce(function(s,r){ return s + (parseFloat(r.pct)||0); }, 0);
+      const ind = container.querySelector('.sum-indicator');
+      if(ind){ ind.textContent = 'Total: '+total.toFixed(2)+'%'+(Math.abs(total-100)<0.01?' \u2713':' \u2014 should equal 100%'); ind.className = 'sum-indicator '+(Math.abs(total-100)<0.01?'ok':'bad'); }
+    });
+  });
+  const addBtn = container.querySelector('#pdAddRow');
+  if(addBtn) addBtn.addEventListener('click', function(){ state.percentDist.push({account:'',pct:''}); renderCurrentSection(); });
+  container.querySelectorAll('[data-pdremove]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const i = parseInt(btn.getAttribute('data-pdremove'),10);
+      state.percentDist.splice(i,1);
+      renderCurrentSection();
+    });
+  });
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Employee Relationships (nepotism disclosure, repeatable)
+   ========================================================================= */
+function renderRelationships(){
+  const rows = state.relationships;
+  let html = '<div class="hint" style="margin-bottom:10px;">List any relatives currently employed by the City. Leave blank if none.</div>';
+  rows.forEach(function(r,i){
+    html += '<div class="repeat-row rel-row" data-relrow="'+i+'">' +
+      '<div class="field"><label style="'+(i>0?'opacity:0;height:0;margin:0;':'')+'">Name of Relative</label><input data-rel="name" data-i="'+i+'" value="'+esc(r.name)+'"></div>' +
+      '<div class="field"><label style="'+(i>0?'opacity:0;height:0;margin:0;':'')+'">Relationship to Employee</label><select data-rel="rel" data-i="'+i+'"><option value="">Select\u2026</option>' +
+        CODES.relationship.map(function(o){ return '<option value="'+o.v+'"'+(r.rel===o.v?' selected':'')+'>'+esc(o.l)+'</option>'; }).join('') + '</select></div>' +
+      '<div class="field"><label style="'+(i>0?'opacity:0;height:0;margin:0;':'')+'">Relative\u2019s Dept / Position</label><input data-rel="dept" data-i="'+i+'" value="'+esc(r.dept)+'"></div>' +
+      (rows.length>1 ? '<button type="button" class="rowbtn" data-relremove="'+i+'">\u2715</button>' : '<div></div>') +
+    '</div>';
+  });
+  html += '<button type="button" class="addrow-btn" id="relAddRow">+ Add another relative</button>';
+  return html;
+}
+function bindRelationships(container){
+  container.querySelectorAll('[data-rel]').forEach(function(node){
+    node.addEventListener(node.tagName==='SELECT'?'change':'input', function(){
+      const i = parseInt(node.getAttribute('data-i'),10);
+      state.relationships[i][node.getAttribute('data-rel')] = node.value;
+    });
+  });
+  const addBtn = container.querySelector('#relAddRow');
+  if(addBtn) addBtn.addEventListener('click', function(){ state.relationships.push({name:'',rel:'',dept:''}); renderCurrentSection(); });
+  container.querySelectorAll('[data-relremove]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      state.relationships.splice(parseInt(btn.getAttribute('data-relremove'),10),1);
+      renderCurrentSection();
+    });
+  });
+}
+
+/* =========================================================================
+   CUSTOM SECTION: Direct Deposit
+   ========================================================================= */
+function bankOptions(sel){
+  return '<option value="">Select bank\u2026</option>' + BANKS.map(function(b){
+    return '<option value="'+esc(b.name)+'" data-routing="'+esc(b.routing)+'"'+(sel===b.name?' selected':'')+'>'+esc(b.name)+'</option>';
+  }).join('');
+}
+function renderDirectDeposit(){
+  const b1 = state.bank1, b2 = state.bank2;
+  let html = '<div class="subhead">Account 1'+(state.bank2Enabled?' (Primary)':'')+'</div>';
+  html += '<div class="grid">';
+  html += '<div class="field"><label>Bank <span class="req">*</span></label><select data-bank="1" data-bk="bank">'+bankOptions(b1.bank)+'</select></div>';
+  html += '<div class="field"><label>Routing Number <span class="req">*</span></label><input data-bank="1" data-bk="routing" value="'+esc(b1.routing)+'" placeholder="9 digits"></div>';
+  html += '<div class="field"><label>Account Number <span class="req">*</span></label><input data-bank="1" data-bk="account" value="'+esc(b1.account)+'"></div>';
+  html += '<div class="field"><label>Account Type</label><select data-bank="1" data-bk="type">' +
+    ['Checking','Savings'].map(function(t){ return '<option'+(b1.type===t?' selected':'')+'>'+t+'</option>'; }).join('') + '</select></div>';
+  html += '<div class="field span-2"><label>Deposit Method</label><div class="radiorow">' +
+    '<label><input type="radio" name="depmethod" data-bank="1" data-bk="method" value="full" '+(b1.method==='full'?'checked':'')+'> Full net pay</label>' +
+    '<label><input type="radio" name="depmethod" data-bank="1" data-bk="method" value="split" '+(b1.method==='split'?'checked':'')+'> Split with a second account</label>' +
+  '</div></div>';
+  if(b1.method==='split'){
+    html += '<div class="field"><label>Amount or % to this account</label><input data-bank="1" data-bk="amount" value="'+esc(b1.amount)+'" placeholder="e.g. 500 or 50%"></div>';
+  }
+  html += '</div>';
+
+  if(b1.method==='split'){
+    html += '<div class="subhead">Account 2 (Remainder)</div><div class="grid">';
+    html += '<div class="field"><label>Bank <span class="req">*</span></label><select data-bank="2" data-bk="bank">'+bankOptions(b2.bank)+'</select></div>';
+    html += '<div class="field"><label>Routing Number <span class="req">*</span></label><input data-bank="2" data-bk="routing" value="'+esc(b2.routing)+'" placeholder="9 digits"></div>';
+    html += '<div class="field"><label>Account Number <span class="req">*</span></label><input data-bank="2" data-bk="account" value="'+esc(b2.account)+'"></div>';
+    html += '<div class="field"><label>Account Type</label><select data-bank="2" data-bk="type">' +
+      ['Checking','Savings'].map(function(t){ return '<option'+(b2.type===t?' selected':'')+'>'+t+'</option>'; }).join('') + '</select></div>';
+    html += '<div class="hint span-2" style="grid-column:1/-1;">Receives remaining balance after Account 1\u2019s amount/percentage is deposited.</div>';
+    html += '</div>';
+  }
+  return html;
+}
+function bindDirectDeposit(container){
+  container.querySelectorAll('[data-bank]').forEach(function(node){
+    const which = node.getAttribute('data-bank');
+    const key = node.getAttribute('data-bk');
+    const needsRerender = (key === 'bank' || key === 'method');
+    const evt = (node.tagName==='SELECT' || node.type==='radio') ? 'change' : 'input';
+    node.addEventListener(evt, function(){
+      const target = which === '1' ? state.bank1 : state.bank2;
+      target[key] = node.value;
+      if(key === 'bank'){
+        const opt = node.selectedOptions[0];
+        target.routing = opt ? (opt.getAttribute('data-routing')||'') : '';
+      }
+      if(needsRerender) renderCurrentSection();
+    });
+  });
+}
+
+/* =========================================================================
+   SECTION DISPATCH, SIDENAV, VALIDATION
+   ========================================================================= */
+const CUSTOM_RENDERERS = {
+  emergency:   { render: renderEmergency,      bind: bindEmergency },
+  accrual:     { render: renderAccrual,        bind: bindAccrual },
+  benefits:    { render: renderBenefits,       bind: bindBenefits },
+  tax:         { render: renderTax,            bind: bindGenericFields },
+  relationships: { render: renderRelationships, bind: bindRelationships },
+  directdeposit: { render: renderDirectDeposit, bind: bindDirectDeposit },
+  review:      { render: renderReview,         bind: bindReview },
+};
+const APPEND_RENDERERS = {
+  percentDist: { render: renderPercentDist, bind: bindPercentDist },
+};
+const PREPEND_RENDERERS = {
+  positionPicker: { render: renderPositionPicker, bind: bindPositionPicker },
+  positionTitlePicker: { render: renderPositionTitlePicker, bind: bindPositionTitlePicker },
+};
+
+function sectionIsComplete(sec){
+  if(sec.custom === 'review') return false;
+  if(sec.fields){
+    for(const f of sec.fields){ if(f.required && !state.data[f.id]) return false; }
+  }
+  if(sec.id === 'position'){
+    const total = state.percentDist.reduce(function(s,r){ return s + (parseFloat(r.pct)||0); }, 0);
+    if(state.percentDist.some(function(r){return !r.account || r.pct==='';}) || Math.abs(total-100) > 0.01) return false;
+    if(!state.position.title) return false;
+  }
+  if(sec.id === 'emergency'){
+    const e = state.emergency;
+    if(!e.p_name || !e.p_rel || !e.p_phone) return false;
+  }
+  if(sec.id === 'accrual' && !state.data.sickLeave) return false;
+  if(sec.id === 'pay' && !(state.position.title && state.position.step)) return false;
+  if(sec.id === 'directdeposit'){
+    const b1 = state.bank1;
+    if(!b1.bank || !b1.routing || !b1.account) return false;
+    if(b1.method==='split'){
+      const b2 = state.bank2;
+      if(!b2.bank || !b2.routing || !b2.account) return false;
+    }
+  }
+  if(sec.id === 'tax'){
+    if(!state.data.stMaritalStatus || !state.data.fedFilingStatus) return false;
+  }
+  return true;
+}
+
+function renderSidenav(){
+  const nav = document.getElementById('sidenavList');
+  if(!nav) return;
+  nav.innerHTML = SECTIONS.map(function(sec,i){
+    const active = i===state.currentSection ? ' active' : '';
+    const done = sectionIsComplete(sec) ? ' done' : '';
+    return '<li class="'+ (active||done) +'"><span class="dot"></span><button data-goto="'+i+'">'+esc(sec.title)+'</button></li>';
+  }).join('');
+  nav.querySelectorAll('[data-goto]').forEach(function(btn){
+    btn.addEventListener('click', function(){ state.currentSection = parseInt(btn.getAttribute('data-goto'),10); renderCurrentSection(); });
+  });
+}
+
+function renderCurrentSection(){
+  const sec = SECTIONS[state.currentSection];
+  const main = document.getElementById('formMain');
+  let bodyHtml;
+  if(sec.custom){
+    bodyHtml = CUSTOM_RENDERERS[sec.custom].render();
+  } else {
+    bodyHtml = '<div class="grid">' + sec.fields.map(renderField).join('') + '</div>';
+  }
+  if(sec.prependCustom){
+    bodyHtml = PREPEND_RENDERERS[sec.prependCustom].render() + bodyHtml;
+  }
+  if(sec.appendCustom){
+    bodyHtml += APPEND_RENDERERS[sec.appendCustom].render();
+  }
+  const isReview = sec.custom === 'review';
+  main.innerHTML =
+    '<div class="section-card">' +
+      (isReview ? '' : ('<h2>'+esc(sec.title)+'</h2>' + (sec.desc?'<div class="section-desc">'+esc(sec.desc)+'</div>':''))) +
+      bodyHtml +
+    '</div>' +
+    (isReview ? '' : (
+      '<div class="btnbar">' +
+        '<button class="btn" id="btnPrev" '+(state.currentSection===0?'disabled':'')+'>\u2190 Back</button>' +
+        '<div class="right">' +
+          '<button class="btn" id="btnSaveExit">Save &amp; review later</button>' +
+          '<button class="btn btn-primary" id="btnNext">'+(state.currentSection===SECTIONS.length-2?'Continue to Review \u2192':'Continue \u2192')+'</button>' +
+        '</div>' +
+      '</div>'
+    ));
+
+  if(!sec.custom) bindGenericFields(main);
+  if(sec.custom) CUSTOM_RENDERERS[sec.custom].bind(main);
+  if(sec.appendCustom) APPEND_RENDERERS[sec.appendCustom].bind(main);
+  if(sec.prependCustom) PREPEND_RENDERERS[sec.prependCustom].bind(main);
+
+  const prevBtn = document.getElementById('btnPrev');
+  if(prevBtn) prevBtn.addEventListener('click', function(){ state.currentSection--; renderCurrentSection(); window.scrollTo(0,0); });
+  const nextBtn = document.getElementById('btnNext');
+  if(nextBtn) nextBtn.addEventListener('click', function(){
+    if(validateSection(sec)){
+      state.currentSection++; renderCurrentSection(); window.scrollTo(0,0);
+    } else {
+      showToast('Please complete the required fields highlighted below.');
+    }
+  });
+  const saveExitBtn = document.getElementById('btnSaveExit');
+  if(saveExitBtn) saveExitBtn.addEventListener('click', function(){ showToast('Progress is kept in this browser tab \u2014 come back anytime before submitting.'); });
+
+  renderSidenav();
+}
+
+function validateSection(sec){
+  state.invalidFields = {};
+  let ok = true;
+  if(sec.fields){
+    sec.fields.forEach(function(f){
+      if(f.required && !state.data[f.id]){ state.invalidFields[f.id] = 'required'; ok = false; }
+      if(f.pattern && state.data[f.id]){
+        const re = new RegExp(f.pattern);
+        if(!re.test(state.data[f.id])){ state.invalidFields[f.id] = 'format'; ok = false; }
+      }
+    });
+  }
+  if(sec.id === 'emergency'){
+    const e = state.emergency;
+    if(!e.p_name || !e.p_rel || !e.p_phone) ok = false;
+  }
+  if(sec.id === 'accrual' && !state.data.sickLeave) ok = false;
+  if(sec.id === 'pay' && !(state.position.title && state.position.step)) ok = false;
+  if(sec.id === 'position'){
+    const total = state.percentDist.reduce(function(s,r){ return s + (parseFloat(r.pct)||0); }, 0);
+    if(state.percentDist.some(function(r){return !r.account || r.pct==='';}) || Math.abs(total-100) > 0.01) ok = false;
+    if(!state.position.title) ok = false;
+  }
+  if(sec.id === 'directdeposit'){
+    const b1 = state.bank1;
+    if(!b1.bank || !b1.routing || !b1.account) ok = false;
+    if(b1.method==='split'){ const b2=state.bank2; if(!b2.bank||!b2.routing||!b2.account) ok = false; }
+  }
+  if(sec.id === 'tax' && (!state.data.stMaritalStatus || !state.data.fedFilingStatus)) ok = false;
+  if(!ok) renderCurrentSection();
+  markInvalid();
+  return ok;
+}
+function markInvalid(){
+  if(!state.invalidFields) return;
+  Object.keys(state.invalidFields).forEach(function(id){
+    const input = document.getElementById('f_'+id);
+    const wrap = document.getElementById('wrap_'+id);
+    if(input) input.classList.add('err');
+    if(wrap) wrap.classList.add('invalid');
+  });
+}
+
+/* =========================================================================
+   SUMMARY BUILDING (shared by review page, DB record, and downloaded file)
+   ========================================================================= */
+function codeLabel(list, val){
+  const hit = list.find(function(o){ return o.v === val; });
+  if(!hit) return '';
+  const code = fieldCode(hit);
+  return hit.l === code ? hit.l : (hit.l + ' (' + code + ')');
+}
+function fullName(){
+  const d = state.data;
+  return [d.firstName, d.mi, d.lastName].filter(Boolean).join(' ') || '(name not entered)';
+}
+function buildSummarySections(){
+  const d = state.data;
+  const out = [];
+  SECTIONS.forEach(function(sec){
+    if(sec.custom === 'review') return;
+    const items = [];
+    if(sec.fields){
+      sec.fields.forEach(function(f){
+        let v = d[f.id] || '';
+        if(f.type === 'select' && v){
+          if(f.optgroups){
+            const flat = [].concat.apply([], f.optgroups.map(function(g){return g.options;}));
+            const hit = flat.find(function(o){ return o.value===v; });
+            v = hit ? hit.label : v;
+          } else {
+            v = codeLabel(f.options.map(function(o){return {v:o.value,l:o.label};}), v);
+          }
+        }
+        items.push({ k:f.label, v:v, missing: f.required && !d[f.id] });
+      });
+    }
+    if(sec.id === 'position'){
+      const p = state.position;
+      items.unshift({k:'Authorized Position', v: p.title ? (p.title+' (Grade '+p.grade+', '+(p.chart==='FT'?'Full-Time':'Part-Time')+' chart)') : '', missing: !p.title});
+      state.percentDist.forEach(function(r,i){
+        if(r.account || r.pct){
+          const flat = [].concat.apply([], DEPT_ACCOUNT_OPTGROUPS.map(function(g){return g.options;}));
+          const hit = flat.find(function(o){ return o.value===r.account; });
+          items.push({k:'Distribution line '+(i+1), v:(hit?hit.label:(r.account||'\u2014'))+' \u2014 '+(r.pct||'0')+'%'});
+        }
+      });
+    }
+    if(sec.id === 'pay'){
+      const p = state.position;
+      const posStr = p.title ? (p.title+' \u2014 Grade '+p.grade+', Step '+p.step+' ('+(p.chart==='FT'?'Full-Time':'Part-Time')+' chart)') : '';
+      items.unshift({k:'Position (salary chart)', v: posStr, missing: !posStr});
+    }
+    if(sec.id === 'emergency'){
+      const e = state.emergency;
+      items.push({k:'Primary contact', v:e.p_name||'', missing:!e.p_name});
+      items.push({k:'Primary relationship', v:codeLabel(CODES.relationship,e.p_rel)||'', missing:!e.p_rel});
+      items.push({k:'Primary phone', v:e.p_phone||'', missing:!e.p_phone});
+      items.push({k:'Primary other phone', v:e.p_phone2||''});
+      items.push({k:'Secondary contact', v:e.s_name||''});
+      items.push({k:'Secondary relationship', v:codeLabel(CODES.relationship,e.s_rel)||''});
+      items.push({k:'Secondary phone', v:e.s_phone||''});
+    }
+    if(sec.id === 'accrual'){
+      items.push({k:'Comp time code', v:codeLabel(CODES.compTime, d.compTime)||''});
+      items.push({k:'On-call court comp time', v:d.onCallComp==='Y'?'Yes':(d.onCallComp==='N'?'No':'')});
+      items.push({k:'Sick leave code', v:codeLabel(CODES.sickLeave, d.sickLeave)||'', missing:!d.sickLeave});
+      items.push({k:'Vacation code', v: state.vacation.tier ? (state.vacation.tier+' \u2014 '+state.vacation.group) : '', missing:!state.vacation.tier});
+    }
+    if(sec.id === 'benefits'){
+      const addPayLabels = [];
+      ADD_PAY_GROUPS.forEach(function(g){ g.items.forEach(function(it){ if(state.addPay.indexOf(it.v)>-1) addPayLabels.push(it.l+' ('+fieldCode(it)+')'); }); });
+      items.push({k:'Additional pay', v: addPayLabels.join('; ') || 'None'});
+      items.push({k:'Health plan', v: state.health.tier ? (state.health.group+' \u2014 '+state.health.tier) : 'None elected'});
+      items.push({k:'Dental plan', v: state.dental.tier ? (state.dental.group+' \u2014 '+state.dental.tier) : 'None elected'});
+      items.push({k:'Vision plan', v: state.vision.tier ? ('MetLife Vision \u2014 '+state.vision.tier) : 'None elected'});
+      function pickLabels(groups, arr){
+        const out = [];
+        groups.forEach(function(g){ g.items.forEach(function(it){ if(arr.indexOf(it.v)>-1) out.push(it.l+' ('+fieldCode(it)+')'); }); });
+        return out.join('; ') || 'None';
+      }
+      items.push({k:'Supplemental insurance', v: pickLabels(SUPPLEMENTAL_GROUPS, state.supplemental)});
+      items.push({k:'Flexible spending account', v: pickLabels([FSA_GROUP], state.fsa)});
+      items.push({k:'Deferred compensation', v: pickLabels(DEFCOMP_GROUPS, state.defcomp)});
+      const dedLabels = CODES.deduction.filter(function(o){ return state.deductions.indexOf(o.v)>-1; }).map(function(o){ return o.l+' ('+o.v+')'; });
+      items.push({k:'Other deductions', v: dedLabels.join('; ') || 'None'});
+    }
+    if(sec.id === 'relationships'){
+      const rows = state.relationships.filter(function(r){ return r.name; });
+      if(rows.length === 0) items.push({k:'Relatives disclosed', v:'None'});
+      rows.forEach(function(r,i){
+        items.push({k:'Relative '+(i+1), v: r.name+' \u2014 '+(codeLabel(CODES.relationship,r.rel)||'?')+(r.dept?(' \u2014 '+r.dept):'')});
+      });
+    }
+    if(sec.id === 'directdeposit'){
+      const b1 = state.bank1;
+      items.push({k:'Account 1 bank', v:b1.bank||'', missing:!b1.bank});
+      items.push({k:'Account 1 routing / acct #', v:(b1.routing||'?')+' / '+(b1.account||'?'), missing:!b1.routing||!b1.account});
+      items.push({k:'Account 1 type', v:b1.type});
+      items.push({k:'Deposit method', v: b1.method==='split' ? 'Split with a second account' : 'Full net pay'});
+      if(b1.method==='split'){
+        items.push({k:'Account 1 amount', v:b1.amount||''});
+        const b2 = state.bank2;
+        items.push({k:'Account 2 bank', v:b2.bank||'', missing:!b2.bank});
+        items.push({k:'Account 2 routing / acct #', v:(b2.routing||'?')+' / '+(b2.account||'?'), missing:!b2.routing||!b2.account});
+        items.push({k:'Account 2 type', v:b2.type});
+      }
+    }
+    out.push({ title: sec.title, items: items });
+  });
+  return out;
+}
+function buildSummaryText(){
+  const sections = buildSummarySections();
+  let lines = [];
+  lines.push('CITY OF LA VERNE \u2014 NEW EMPLOYEE PAYROLL SETUP');
+  lines.push('Employee: ' + fullName());
+  lines.push('Prepared: ' + new Date().toLocaleString());
+  lines.push('='.repeat(60));
+  sections.forEach(function(s){
+    lines.push('');
+    lines.push(s.title.toUpperCase());
+    lines.push('-'.repeat(s.title.length));
+    s.items.forEach(function(it){
+      lines.push((it.k+':').padEnd(38,' ') + (it.v || '(not provided)'));
+    });
+  });
+  return lines.join('\n');
+}
+
+/* =========================================================================
+   PDF EXPORT (styled like the Review & Submit page, via the browser's
+   native print-to-PDF \u2014 no external library needed)
+   ========================================================================= */
+function buildPrintableHTML(){
+  const sections = buildSummarySections();
+  let html = '<div class="pp-page">';
+  html += '<div class="pp-header"><h1>City of La Verne \u2014 New Employee Payroll Setup</h1>' +
+    '<div class="pp-meta">Employee: '+esc(fullName())+' &nbsp;\u00b7&nbsp; Prepared: '+esc(new Date().toLocaleString())+'</div></div>';
+  sections.forEach(function(s){
+    html += '<div class="pp-section"><h2>'+esc(s.title)+'</h2><div class="pp-grid">';
+    s.items.forEach(function(it){
+      html += '<div class="pp-item'+(!it.v?' pp-empty':'')+'"><span class="pp-k">'+esc(it.k)+'</span><span class="pp-v">'+esc(it.v||'\u2014')+'</span></div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+function exportPDF(){
+  const area = document.getElementById('printArea');
+  area.innerHTML = buildPrintableHTML();
+  window.print();
+}
+
+function renderReview(){
+  const sections = buildSummarySections();
+  const missing = [];
+  sections.forEach(function(s, si){ s.items.forEach(function(it){ if(it.missing) missing.push({sec:si, label:it.k}); }); });
+  let html = '<div class="section-card"><h2>Review &amp; Submit</h2>';
+  html += '<div class="section-desc">Check everything below, then send it to Payroll. You can jump back to any section to fix something.</div>';
+  if(missing.length){
+    html += '<div class="missing-banner"><b>'+missing.length+' required item'+(missing.length>1?'s':'')+' still needed:</b><ul>' +
+      missing.map(function(m){ return '<li><a href="#" data-jump="'+m.sec+'">'+esc(SECTIONS[m.sec].title)+'</a> \u2014 '+esc(m.label)+'</li>'; }).join('') +
+    '</ul></div>';
+  }
+  sections.forEach(function(s, si){
+    html += '<div class="review-section"><h3>'+esc(s.title)+' <a href="#" data-jump="'+si+'" style="font-size:11px; font-weight:400; float:right;">Edit</a></h3><div class="review-grid">';
+    s.items.forEach(function(it){
+      html += '<div class="review-item'+(!it.v?' empty':'')+'"><span class="k">'+esc(it.k)+'</span><span class="v">'+esc(it.v || '\u2014')+'</span></div>';
+    });
+    html += '</div></div>';
+  });
+  html += '</div>';
+  html += '<div class="btnbar">' +
+    '<button class="btn" id="btnBackFromReview">\u2190 Back to form</button>' +
+    '<div class="right">' +
+      '<button class="btn" id="btnDownloadSummary">\u2b07 Download as text</button>' +
+      '<button class="btn" id="btnCopySummary">\u2398 Copy summary</button>' +
+      '<button class="btn" id="btnExportPDF">\uD83D\uDDA8\uFE0F Export as PDF</button>' +
+      '<button class="btn btn-brass" id="btnSubmitToPayroll" '+(missing.length?'disabled':'')+'>Finish for Payroll \u2192</button>' +
+    '</div>' +
+  '</div>';
+  return html;
+}
+function bindReview(container){
+  container.querySelectorAll('[data-jump]').forEach(function(a){
+    a.addEventListener('click', function(e){ e.preventDefault(); state.currentSection = parseInt(a.getAttribute('data-jump'),10); renderCurrentSection(); window.scrollTo(0,0); });
+  });
+  const backBtn = document.getElementById('btnBackFromReview');
+  if(backBtn) backBtn.addEventListener('click', function(){ state.currentSection = SECTIONS.length-2; renderCurrentSection(); });
+  const dlBtn = document.getElementById('btnDownloadSummary');
+  if(dlBtn) dlBtn.addEventListener('click', downloadSummary);
+  const cpBtn = document.getElementById('btnCopySummary');
+  if(cpBtn) cpBtn.addEventListener('click', copySummary);
+  const pdfBtn = document.getElementById('btnExportPDF');
+  if(pdfBtn) pdfBtn.addEventListener('click', exportPDF);
+  const subBtn = document.getElementById('btnSubmitToPayroll');
+  if(subBtn) subBtn.addEventListener('click', submitToPayroll);
+}
+
+async function downloadSummary(){
+  const text = buildSummaryText();
+  const filename = 'new-employee-' + (state.data.lastName||'unnamed').toLowerCase().replace(/[^a-z0-9]+/g,'-') + '.txt';
+  const blob = new Blob([text], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Summary downloaded.');
+}
+async function copySummary(){
+  try{
+    await navigator.clipboard.writeText(buildSummaryText());
+    showToast('Summary copied to clipboard.');
+  }catch(e){ showToast('Could not copy \u2014 try the download button instead.'); }
+}
+
+/* =========================================================================
+   SUBMISSION (standalone build \u2014 no shared queue; HR exports a PDF (or
+   downloads/copies a text summary) and sends it to Payroll directly.)
+   ========================================================================= */
+function submitToPayroll(){
+  state.submitted = true;
+  exportPDF();
+  showSubmittedScreen();
+}
+
+function showSubmittedScreen(){
+  const main = document.getElementById('formMain');
+  main.innerHTML = '<div class="section-card" style="text-align:center; padding:50px 30px;">' +
+    '<div style="font-size:40px;">\u2705</div>' +
+    '<h2 style="margin-top:12px;">Ready for Payroll</h2>' +
+    '<p style="color:var(--muted); max-width:46ch; margin:10px auto 22px;">'+esc(fullName())+'\u2019s setup information is ready. Use the print dialog\u2019s \u201cSave as PDF\u201d to save it, then send it to Payroll however you normally would (email, shared drive, etc.).</p>' +
+    '<div class="btnbar" style="justify-content:center;">' +
+      '<button class="btn" id="btnExportPDF2">\uD83D\uDDA8\uFE0F Export as PDF</button>' +
+      '<button class="btn" id="btnDownloadSummary2">\u2b07 Download as text</button>' +
+      '<button class="btn" id="btnCopySummary2">\u2398 Copy summary</button>' +
+      '<button class="btn btn-primary" id="btnStartAnother">+ Start another submission</button>' +
+    '</div>' +
+  '</div>';
+  document.getElementById('btnExportPDF2').addEventListener('click', exportPDF);
+  document.getElementById('btnDownloadSummary2').addEventListener('click', downloadSummary);
+  document.getElementById('btnCopySummary2').addEventListener('click', copySummary);
+  document.getElementById('btnStartAnother').addEventListener('click', function(){ resetForm(); });
+  document.getElementById('sidenavList') && (document.getElementById('sidenavList').innerHTML = '');
+}
+
+function resetForm(){
+  state.data = { state: 'CA' };
+  state.percentDist = [{account:'',pct:''}];
+  state.emergency = { p_name:'', p_rel:'', p_phone:'', p_phone2:'', s_name:'', s_rel:'', s_phone:'', s_phone2:'' };
+  state.vacation = {group:'',tier:''}; state.health = {group:'',tier:''}; state.dental = {group:'',tier:''}; state.vision = {tier:''};
+  state.position = { chart:'', grade:'', title:'', step:'', hrs:0, rt:'' };
+  state.addPay = []; state.supplemental = []; state.fsa = []; state.defcomp = [];
+  state.deductions = []; state.relationships = [{name:'',rel:'',dept:''}];
+  state.bank1 = { bank:'', routing:'', account:'', type:'Checking', method:'full', amount:'' };
+  state.bank2 = { bank:'', routing:'', account:'', type:'Checking', amount:'' };
+  state.currentSection = 0; state.submitted = false; state.invalidFields = {};
+  renderFormView();
+}
+
+/* =========================================================================
+   BOOTSTRAP
+   ========================================================================= */
+function renderFormView(){
+  const container = document.getElementById('formView');
+  container.innerHTML = '<div class="app">' +
+    '<nav class="sidenav"><div class="progress-label">New Employee Setup</div><ol id="sidenavList"></ol></nav>' +
+    '<main id="formMain"></main>' +
+  '</div>';
+  renderCurrentSection();
+}
+
+renderFormView();
+</script>
+</body>
+</html>
