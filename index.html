@@ -282,9 +282,25 @@
     .review-grid{grid-template-columns:1fr;}
     .cascade{grid-template-columns:1fr;}
   }
+
+  .draft-banner{
+    display:none; background:var(--amber-bg); border-bottom:1px solid #E3C58A; color:var(--brass-dark);
+    padding:10px 22px; font-size:13px; align-items:center; gap:14px; justify-content:center; flex-wrap:wrap;
+  }
+  .draft-banner.show{display:flex;}
+  .draft-banner button{font-size:12.5px; padding:5px 12px; border-radius:6px; border:1px solid #E3C58A; background:#fff; color:var(--brass-dark); font-weight:600;}
+  .draft-banner button.primary{background:var(--brass); color:#fff; border-color:var(--brass);}
+  .btn-danger-outline{background:none; border:1px solid #D9B7B2; color:var(--red);}
+  .btn-danger-outline:hover{background:var(--red-bg); border-color:var(--red);}
 </style>
 </head>
 <body>
+
+<div class="draft-banner" id="draftBanner">
+  <span>\uD83D\uDCC4 We restored a saved draft from earlier on this device.</span>
+  <button class="primary" id="draftKeepBtn">Keep it</button>
+  <button id="draftClearBtn">Discard it &amp; start blank</button>
+</div>
 
 <div class="topbar">
   <div class="seal">LV</div>
@@ -472,19 +488,14 @@ const ADD_PAY_GROUPS = [
     {v:'BL',l:'Bilingual Pay — POA',amt:75},
   ]},
   { g:'Canine Assignment', items:[
-    {v:'K9',l:'Canine Assignment Pay'}, {v:'KR',l:'Canine Assignment Retro'},
+    {v:'K9',l:'Canine Assignment Pay'},
   ]},
   { g:'Fire Officer & Specialty Programs', items:[
     {v:'CH',l:'Chief Officer Program',amt:1750}, {v:'CI',l:'CICCS Qualification Program',amt:1000},
     {v:'CO',l:'Company Officer Program',amt:1500}, {v:'DO',l:'Driver Operator Program',amt:600},
   ]},
-  { g:'Performance & Merit Pay', items:[
-    {v:'EX',l:'Excellent Performance',pct:5}, {v:'EP',l:'Excellent Performance — MM/DH',pct:5},
-    {v:'ER',l:'Excellent Performance — PEPRA',pct:5}, {v:'ES',l:'Excellent Performance Retro — PEPRA'},
-    {v:'XP',l:'Excellent Performance Retro'}, {v:'EA',l:'Employee Achievement Award'}, {v:'MB',l:'Merger Bonus',pct:5},
-  ]},
   { g:'Holiday Pay', items:[
-    {v:'HP',l:'Holiday Pay — Shift'}, {v:'HR',l:'Holiday Pay — Shift Retro'}, {v:'HB',l:'Holiday Payback'},
+    {v:'HP',l:'Holiday Pay — Shift'},
   ]},
   { g:'Marksmanship', items:[
     {v:'M1',l:'Marksmanship — Expert',amt:50}, {v:'M5',l:'Marksmanship — Distinguished Expert',amt:62.5},
@@ -523,7 +534,6 @@ const ADD_PAY_GROUPS = [
     {v:'UF',l:'Uniform — Fire',amt:600}, {v:'UN',l:'Uniform — Fire Mid-Mgmt',amt:600},
     {v:'US',l:'Uniform — Fire Mid-Mgmt PEPRA',amt:600}, {v:'U2',l:'Uniform — Fire PEPRA',amt:600},
     {v:'U1',l:'Uniform — Police PEPRA',amt:1000}, {v:'U3',l:'Uniform — CEA PEPRA',amt:650},
-    {v:'PU',l:'Uniform Payout'},
   ]},
   { g:'Education / Certification Pay', items:[
     {v:'C1',l:'1.25% Education',pct:1.25}, {v:'A1',l:'2.50% Education',pct:2.5}, {v:'A2',l:'2.5% Education — Additional',pct:2.5},
@@ -539,12 +549,6 @@ const ADD_PAY_GROUPS = [
     {v:'W3',l:'5% D2 & T2 Certificate',pct:5}, {v:'W4',l:'5% D3 & T3 Certificate',pct:5},
     {v:'E1',l:'6.25% Education',pct:6.25}, {v:'F1',l:'7.50% Education',pct:7.5},
     {v:'F6',l:'10% Education',pct:10}, {v:'G1',l:'10% Education/Training',pct:10},
-  ]},
-  { g:'Retroactive Pay Adjustments', items:[
-    {v:'RT',l:'Retro Assignment Pay Adjustment'}, {v:'RA',l:'Retro Bilingual Pay'},
-    {v:'RE',l:'Retro Education Pay'},
-    {v:'RM',l:'Retro Marksmanship Pay'}, {v:'RP',l:'Retro Post Add Pay'},
-    {v:'RS',l:'Retro Standby Pay'},
   ]},
 ];
 
@@ -573,22 +577,61 @@ const VACATION_GROUPS = [
 // are the per-pay-period (or monthly — confirm which with Payroll) deduction
 // amount as listed in the export.
 const HEALTH_GROUPS = [
-  { g:'Dept Head / Mid-Mgmt — Health Net HMO', tiers:[['Employee Only','H5',83.65],['Couple','H6',375.74],['Employee + Child','H7',227.61],['Family','H8',398.85]] },
-  { g:'Dept Head / Mid-Mgmt — Health Net PPO', tiers:[['Single','N1',250.05],['Couple','N2',775.13],['Employee + Child','N3',518.84],['Family','N4',906.41]] },
-  { g:'Dept Head / Mid-Mgmt — Kaiser', tiers:[['Single','K5',30.81],['Couple','K6',248.93],['Employee + Child','K7',135.16],['Family','K8',237.71]] },
-  { g:'General / Fire Mid-Mgmt — Health Net HMO', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[['Single','J5',133.65],['Couple','J6',525.74],['Employee + Child','J7',327.61],['Family','J8',648.85]] },
-  { g:'General / Fire Mid-Mgmt — Health Net PPO', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[['Single','O1',300.05],['Couple','O2',925.13],['Employee + Child','O3',618.84],['Family','O4',1156.41]] },
-  { g:'General / Fire Mid-Mgmt — Kaiser', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[['Single','J1',80.81],['Couple','J2',398.93],['Employee + Child','J3',235.16],['Family','J4',487.71]] },
-  { g:'LVFA (Fire) — Health Net HMO', tiers:[['Single','H1',158.65],['Couple','H2',600.74],['Employee + Child','H3',402.61],['Family','H4',748.85]] },
-  { g:'LVFA (Fire) — Kaiser', tiers:[['Single','K1',105.81],['Couple','K2',473.93],['Employee + Child','K3',310.16],['Family','K4',587.71]] },
-  { g:'POA (Police) — Health Net HMO', tiers:[['Single','I1',52.84],['Couple','I2',375.74],['Employee + Child','I3',227.61],['Family','I4',398.85]] },
-  { g:'POA (Police) — Health Net PPO', warn:'The ABT export only lists Single and Family tiers for this plan — no Couple/Employee+Child codes on file. Confirm with Payroll if those are needed.', tiers:[['Single','I8',219.24],['Family','O5',906.41]] },
-  { g:'POA (Police) — Kaiser', warn:'The ABT export has no Single-tier code on file for this plan — confirm with Payroll if needed.', tiers:[['Couple','I5',248.93],['Employee + Child','I6',135.16],['Family','I7',237.71]] },
+  { g:'Dept Head / Mid-Mgmt — Health Net HMO', tiers:[
+    ['Employee Only','H5',83.65,null,'N5',375.00],['Couple','H6',375.74,null,'N6',725.00],
+    ['Employee + Child','H7',227.61,null,'N7',575.00],['Family','H8',398.85,null,'N8',1000.00],
+  ]},
+  { g:'Dept Head / Mid-Mgmt — Health Net PPO', tiers:[
+    ['Single','N1',250.05,null,'H5',375.00],['Couple','N2',775.13,null,'H6',725.00],
+    ['Employee + Child','N3',518.84,null,'H7',575.00],['Family','N4',906.41,null,'H8',1000.00],
+  ]},
+  { g:'Dept Head / Mid-Mgmt — Kaiser', tiers:[
+    ['Single','K5',30.81,null,'B1',375.00],['Couple','K6',248.93,null,'B2',725.00],
+    ['Employee + Child','K7',135.16,null,'B3',575.00],['Family','K8',237.71,null,'B4',1000.00],
+  ]},
+  { g:'General / Fire Mid-Mgmt — Health Net HMO', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[
+    ['Single','J5',133.65,null,'J5',325.00],['Couple','J6',525.74,null,'J6',575.00],
+    ['Employee + Child','J7',327.61,null,'J7',475.00],['Family','J8',648.85,null,'J8',750.00],
+  ]},
+  { g:'General / Fire Mid-Mgmt — Health Net PPO', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[
+    ['Single','O1',300.05,null,'O1',325.00],['Couple','O2',925.13,null,'O2',575.00],
+    ['Employee + Child','O3',618.84,null,'O3',475.00],['Family','O4',1156.41,null,'O4',750.00],
+  ]},
+  { g:'General / Fire Mid-Mgmt — Kaiser', warn:'Fire Mid-Mgmt (FM) uses these same tiers as General, per HR direction — not confirmed in the ABT export itself.', tiers:[
+    ['Single','J1',80.81,null,'J1',325.00],['Couple','J2',398.93,null,'J2',575.00],
+    ['Employee + Child','J3',235.16,null,'J3',475.00],['Family','J4',487.71,null,'J4',750.00],
+  ]},
+  { g:'LVFA (Fire) — Health Net HMO', tiers:[
+    ['Single','H1',158.65,null,'N1',300.00],['Couple','H2',600.74,null,'N2',500.00],
+    ['Employee + Child','H3',402.61,null,'N3',400.00],['Family','H4',748.85,null,'N4',650.00],
+  ]},
+  { g:'LVFA (Fire) — Kaiser', tiers:[
+    ['Single','K1',105.81,null,'K5',300.00],['Couple','K2',473.93,null,'K6',500.00],
+    ['Employee + Child','K3',310.16,null,'K7',400.00],['Family','K4',587.71,null,'K8',650.00],
+  ]},
+  { g:'POA (Police) — Health Net HMO', tiers:[
+    ['Single','I1',52.84,null,'I1',405.81],['Couple','I2',375.74,null,'I2',725.00],
+    ['Employee + Child','I3',227.61,null,'I3',575.00],['Family','I4',398.85,null,'I4',1000.00],
+  ]},
+  { g:'POA (Police) — Health Net PPO', warn:'The ABT export only lists Single and Family tiers for this plan — no Couple/Employee+Child codes on file. Confirm with Payroll if those are needed.', tiers:[
+    ['Single','I8',219.24,null,'I9',405.81],['Family','O5',906.41,null,'O5',1000.00],
+  ]},
+  { g:'POA (Police) — Kaiser', warn:'The ABT export has no Single-tier code on file for this plan (the Benefit side does: I5, $405.81 employer-paid) — confirm the correct ABT code with Payroll if an employee needs this tier.', tiers:[
+    ['Couple','I5',248.93,null,'I6',725.00],['Employee + Child','I6',135.16,null,'I7',575.00],['Family','I7',237.71,null,'I8',1000.00],
+  ]},
 ];
 
 const DENTAL_GROUPS = [
-  { g:'Delta Care Dental (HMO)', warn:'The ABT export marks the Employee-Only tier (4D) Inactive — only Couple and Family are currently active.', tiers:[['Couple','5D',3.06],['Family','6D',12.40]] },
-  { g:'Delta Care — POA', warn:'The ABT export marks the Employee-Only and Employee+1 tiers (C1, C2) Inactive — only Family is currently active.', tiers:[['Family','C3',6.90]] },
+  { g:'Delta Care Dental (HMO)', tiers:[
+    ['Single','4D',11.84,'Employer-paid in full — no employee deduction',null,null,'Benefit'],
+    ['Couple','5D',3.06,null,'5D',16.50],
+    ['Family','6D',12.40,null,'6D',16.50],
+  ]},
+  { g:'Delta Care — POA', tiers:[
+    ['Single','C1',11.84,'Employer-paid in full — no employee deduction',null,null,'Benefit'],
+    ['Employee + 1','C2',19.56,'Employer-paid in full — no employee deduction',null,null,'Benefit'],
+    ['Family','C3',6.90,null,'C3',22.00],
+  ]},
   { g:'Delta Dental PPO', tiers:[['Single','1D',8.39],['Couple','2D',32.74],['Family','3D',69.04]] },
   { g:'Delta PPO — POA', tiers:[['Single','7D',2.89],['Employee + 1','8D',27.24],['Family','9D',63.54]] },
 ];
@@ -603,7 +646,6 @@ const SUPPLEMENTAL_GROUPS = [
   ]},
   { g:'Other Voluntary Coverage', items:[
     {v:'CC',l:'Critical Illness'}, {v:'HS',l:'Hospital'}, {v:'SD',l:'Short Term Disability'},
-    {v:'LA',l:'Aflac / Retro Reimburse'}
   ]},
 ];
 // Flexible Spending Account (125 Plan) — checkbox picker
@@ -1033,14 +1075,71 @@ const REF_BENEFIT_CODES = [
   ]},
 ];
 
+// Employer-paid Benefit "package" by Group/Bargaining Plan \u2014 source: HR's
+// Benefits by Employee Group sheet. Once HR picks the Group on Classification
+// Codes, this package displays automatically (read-only \u2014 these are
+// employer-determined, not an HR pick list). Codes cross-reference
+// REF_BENEFIT_CODES above. Groups not listed here (Reserves, LA Impact) have
+// no standard package on file.
+const GROUP_BENEFIT_PACKAGES = {
+  MM: { name:'Mid Management', items:[
+    ['Counseling','CT'], ['AD&D Mid-Management $5,000','D1'], ['GASB 45','G1'], ['LTD','LT'],
+    ['Life Ins Mid Mgmt $50,000','L1'], ['Medicare 1.45%','MD'], ['POB City-Misc','P7'],
+    ['Unemployment','UI'], ['Workers\u2019 Comp','WC'], ['4th Level Survivor Misc','4M'],
+  ]},
+  DH: { name:'Executive Management', items:[
+    ['Counseling','CT'], ['AD&D DH-Mgmt $5,000','D2'], ['GASB 45','G1'], ['LTD','LT'],
+    ['Life Ins Mgmt $100,000','L2'], ['Medicare 1.45%','MD'], ['POB City-Misc','P7'],
+    ['Unemployment','UI'], ['Workers\u2019 Comp','WC'], ['4th Level Survivor Misc','4M'],
+  ]},
+  PD: { name:'POA', items:[
+    ['Counseling','CT'], ['AD&D Police $50,000','D4'], ['GASB 45','G4'], ['LTD','LT'],
+    ['Life Ins PD Mgmt $50,000','L7'], ['Medicare','MD'], ['POB Safety','P6'],
+    ['Unemployment','UI'], ['Workers\u2019 Comp Ins \u2014 Safety','WS'], ['4th Level Survivor Safety','4S'],
+  ]},
+  PL: { name:'PMMA (Lieutenants & Captain)', items:[
+    ['Counseling','CT'], ['AD&D PD/Mgmt $50,000','D7'], ['GASB 45','G4'], ['LTD','LT'],
+    ['Life Ins PD Mgmt $50,000','L7'], ['Medicare','MD'], ['POB City-Safety','P6'],
+    ['Unemployment','UI'], ['Workers\u2019 Comp Ins \u2014 Safety','WS'], ['4th Level Survivor Safety','4S'],
+  ]},
+  MS: { name:'General Unit', items:[
+    ['Counseling','CT'], ['AD&D Misc $20,000','D3'], ['GASB 45','G2'], ['LTD','LT'],
+    ['Life Ins Misc $50,000','L3'], ['Medicare','MD'], ['POB City-Misc','P7'],
+    ['Unemployment','UI'], ['Workers Comp','WC'], ['4th Level Survivor Misc','4M'],
+  ]},
+  AO: { name:'Ambulance Operator', items:[
+    ['Counseling','CT'], ['AD&D Misc $20,000','D3'], ['GASB 45','G2'], ['LTD','LT'],
+    ['Life Ins Misc $50,000','L3'], ['Medicare','MD'], ['POB City-Misc','P7'],
+    ['Unemployment','UI'], ['Workers Comp','WC'], ['4th Level Survivor Misc','4M'],
+  ]},
+  FS: { name:'LVFA', items:[
+    ['Counseling','CT'], ['AD&D Fire $50,000','D5'], ['GASB 45','G3'],
+    ['Life Ins Fire $50,000/$25,000','L5'], ['Medicare','MD'], ['POB City-Safety','P6'],
+    ['Unemployment','UI'], ['Workers Comp \u2014 Safety','WS'], ['4th Level Survivor Safety','4S'],
+  ], note:'This group\u2019s sheet doesn\u2019t list an LTD row \u2014 confirm with Payroll whether that\u2019s intentional.' },
+  FM: { name:'FMMA (Fire Mid Management)', items:[
+    ['Counseling','CT'], ['AD&D Fire $50,000','D5'], ['GASB 45','G3'], ['LTD','LT'],
+    ['Life Ins Mid Mgmt $50,000','L1'], ['Medicare','MD'], ['POB City-Safety','P6'],
+    ['Unemployment','UI'], ['Workers Comp \u2014 Safety','WS'], ['4th Level Survivor Safety','4S'],
+  ]},
+  PT: { name:'Part Time', items:[
+    ['Medicare','MD'], ['P/T SS Replacement, Deferred (ER)','PT'], ['Unemployment','UI'], ['Workers\u2019 Comp Ins','WC'],
+  ]},
+  CC: { name:'City Council', items:[
+    ['Counseling','CT'], ['AD&D DH-Mgmt $5,000','D2'], ['GASB 45','G1'],
+    ['Life Ins Mgmt $100,000','L2'], ['Medicare','MD'], ['Unemployment','UI'], ['Workers\u2019 Comp Insurance','WC'],
+  ], note:'Council members can have either PERS or P/T SS Replacement (Deferred) \u2014 this is person-specific, not fixed by group.' },
+};
+
 const REF_PERS_EMPLOYEE_RATES = [
+
   ['PERS Employee Cont — DH/MM Sworn','PF','9%'], ['PERS Employee Cont — Misc Full','PM','8%'],
   ['PERS Employee Cont — Safety Full','PS','9%'], ['PERS Employee Fire PEPRA','SF','13.75%'],
   ['PERS Employee Misc PEPRA','MP','7.75%'], ['PERS Employee PD PEPRA','SP','13.75%'],
   ['PERS Employee Cont — F.D. (9%)','P9','9%'], ['PERS Employee Cont — DH/MM','PG','8%'],
   ['PERS Employee Cont — PD M/M','PL','9%'], ['PERS Employee Contrib — F.D.','PE','9%'],
   ['PERS Employee Contrib — PD','PD','9%'], ['PERS Employee Cont — Misc','PC','8%'],
-  ['PERS Buyback','PB','—'], ['Retro Employee PERS Contribution','RP','—'],
+  ['PERS Buyback','PB','—'],
 ];
 // Note: the Benefit Code export's own employee-side PERS codes (PG, P1, PF,
 // P2, PL, R1) are all marked Inactive there — current employee contribution
@@ -1054,7 +1153,6 @@ const REF_PERS_EMPLOYER_RATES = [
   ['PERS Unfunded — Misc','PU','8.932%'], ['PERS Unfunded PEPRA — Misc','PW','8.932%'],
   ['PERS Unfunded PEPRA — Fire','PX','13.019%'], ['PERS Unfunded PEPRA — PD','PY','13.019%'],
   ['POB City — Misc','P7','12.789%'], ['POB City — Safety','P6','18.603%'],
-  ['PERS Retro Employer','P9','—'],
 ];
 // Note: the export lists two different "Safety" employer rates — P4 at
 // 26.42% and PD at 25.42% — with no indication of which bargaining group
@@ -1307,6 +1405,9 @@ function bindGenericFields(container){
    ========================================================================= */
 function renderCascade(opts){
   // opts: {id, label, groups, stateObj, warnGlobal}
+  // tier tuple: [label, code, amount, note, altCode, altAmount, codeType, altCodeType]
+  // codeType/altCodeType default to 'ABT'/'Benefit' but can be overridden per
+  // tier (e.g. when the only real code for a $0 tier is the Benefit code).
   const groups = opts.groups;
   const cur = opts.stateObj;
   const groupOpts = groups.map(function(g,i){
@@ -1314,19 +1415,27 @@ function renderCascade(opts){
   }).join('');
   const selGroup = groups.find(function(g){ return g.g === cur.group; });
   const tierOpts = selGroup ? selGroup.tiers.map(function(t){
+    const codeType = t[6] || 'ABT';
+    const altCodeType = t[7] || 'Benefit';
     const amt = t[2] != null ? '  \u2014  $'+t[2].toFixed(2) : '';
-    return '<option value="'+esc(t[1])+'"'+(cur.tier===t[1]?' selected':'')+'>'+esc(t[0])+' \u2014 '+esc(t[1])+amt+'</option>';
+    const note = t[3] ? '  ('+t[3]+')' : '';
+    const alt = t[4] ? '   |   '+altCodeType+': '+t[4]+(t[5]!=null?' \u2014 $'+t[5].toFixed(2):'') : '';
+    return '<option value="'+esc(t[1])+'"'+(cur.tier===t[1]?' selected':'')+'>'+esc(t[0])+' \u2014 '+esc(codeType)+': '+esc(t[1])+amt+esc(note)+esc(alt)+'</option>';
   }).join('') : '';
   const warn = selGroup && selGroup.warn ? '<div class="warnbox">\u26A0\uFE0F <span>'+esc(selGroup.warn)+'</span></div>' : '';
   const curTierData = selGroup ? selGroup.tiers.find(function(t){ return t[1]===cur.tier; }) : null;
+  const curCodeType = curTierData ? (curTierData[6] || 'ABT') : 'ABT';
+  const curAltCodeType = curTierData ? (curTierData[7] || 'Benefit') : 'Benefit';
   const curAmt = curTierData && curTierData[2] != null ? ' \u2014 $'+curTierData[2].toFixed(2) : '';
+  const curNote = curTierData && curTierData[3] ? ' \u2014 '+curTierData[3] : '';
+  const curAlt = curTierData && curTierData[4] ? ' &nbsp;|&nbsp; '+curAltCodeType+' code: <b>'+esc(curTierData[4])+'</b>'+(curTierData[5]!=null?' \u2014 $'+curTierData[5].toFixed(2)+(curAltCodeType==='Benefit'?' (employer-paid)':''):'') : '';
   return '<div class="field span-2">' +
     '<label>'+esc(opts.label)+(opts.required?' <span class="req">*</span>':'')+'</label>' +
     '<div class="cascade">' +
       '<select data-cascade-group="'+opts.id+'"><option value="">Select group\u2026</option>'+groupOpts+'</select>' +
       '<select data-cascade-tier="'+opts.id+'" '+(selGroup?'':'disabled')+'><option value="">'+(selGroup?'Select tier\u2026':'Select a group first')+'</option>'+tierOpts+'</select>' +
       (warn ? '<div class="cascade-result" style="grid-column:1/-1">'+warn+'</div>' : '') +
-      (cur.group && cur.tier ? '<div class="cascade-result">Selected code: <b>'+esc(cur.tier)+'</b> \u2014 '+esc(cur.group)+esc(curAmt)+'</div>' : '') +
+      (cur.group && cur.tier ? '<div class="cascade-result">'+esc(curCodeType)+' code: <b>'+esc(cur.tier)+'</b> \u2014 '+esc(cur.group)+esc(curAmt)+esc(curNote)+curAlt+'</div>' : '') +
     '</div>' +
   '</div>';
 }
@@ -1420,8 +1529,29 @@ function renderCheckGroup(name, groups, selected){
       }).join('') + '</div></div>';
   }).join('') + '</div>';
 }
+function renderEmployerBenefitPackage(){
+  const groupCode = state.data.groupPlan;
+  const groupLabel = groupCode ? (CODES.groupPlan.find(function(g){return g.v===groupCode;}) || {}).l : '';
+  let html = '<div class="subhead">Employer Benefit Package</div>';
+  if(!groupCode){
+    html += '<div class="hint" style="margin-bottom:8px;">Pick a Group / Bargaining Plan on the Classification Codes tab, and the employer-paid benefit package for that group will show here automatically.</div>';
+    return html;
+  }
+  const pkg = GROUP_BENEFIT_PACKAGES[groupCode];
+  if(!pkg){
+    html += '<div class="warnbox">\u26A0\uFE0F <span>No standard benefit package is on file for '+esc(groupLabel||groupCode)+'. Confirm the correct employer-paid benefits with Payroll.</span></div>';
+    return html;
+  }
+  html += '<div class="hint" style="margin-bottom:10px;">Determined automatically by the employee\u2019s Group ('+esc(groupLabel)+') \u2014 this is employer-paid and not something to pick individually. If the group changes on the Classification Codes tab, this updates too.</div>';
+  html += '<div class="check-grid" style="margin-bottom:4px;">' + pkg.items.map(function(it){
+    return '<div class="checkitem" style="padding:3px 0;"><span>\u2713 '+esc(it[0])+' <span style="color:var(--muted); font-family:ui-monospace,monospace; font-size:12px;">('+esc(it[1])+')</span></span></div>';
+  }).join('') + '</div>';
+  if(pkg.note) html += '<div class="warnbox">\u26A0\uFE0F <span>'+esc(pkg.note)+'</span></div>';
+  return html;
+}
 function renderBenefits(){
-  let html = '<div class="subhead">Additional Pay</div>';
+  let html = renderEmployerBenefitPackage();
+  html += '<div class="subhead">Additional Pay</div>';
   html += '<div class="hint" style="margin-bottom:12px;">Check every additional pay that applies to this employee. Items marked \u26A0\uFE0F have a data discrepancy in the source export \u2014 confirm with Payroll before relying on them.</div>';
   html += renderCheckGroup('addPay', ADD_PAY_GROUPS, state.addPay);
 
@@ -2020,11 +2150,31 @@ function buildSummarySections(){
       items.push({k:'Vacation code', v: state.vacation.tier ? (state.vacation.tier+' \u2014 '+state.vacation.group) : '', missing:!state.vacation.tier});
     }
     if(sec.id === 'benefits'){
+      const pkg = state.data.groupPlan ? GROUP_BENEFIT_PACKAGES[state.data.groupPlan] : null;
+      if(pkg){
+        items.push({k:'Employer benefit package', v: pkg.items.map(function(it){ return it[0]+' ('+it[1]+')'; }).join('; ')});
+      } else if(state.data.groupPlan){
+        items.push({k:'Employer benefit package', v:'None on file for this group \u2014 confirm with Payroll'});
+      } else {
+        items.push({k:'Employer benefit package', v:'', missing:false});
+      }
       const addPayLabels = [];
       ADD_PAY_GROUPS.forEach(function(g){ g.items.forEach(function(it){ if(state.addPay.indexOf(it.v)>-1) addPayLabels.push(it.l+' ('+fieldCode(it)+')'); }); });
       items.push({k:'Additional pay', v: addPayLabels.join('; ') || 'None'});
-      items.push({k:'Health plan', v: state.health.tier ? (state.health.group+' \u2014 '+state.health.tier) : 'None elected'});
-      items.push({k:'Dental plan', v: state.dental.tier ? (state.dental.group+' \u2014 '+state.dental.tier) : 'None elected'});
+      function cascadeSummary(stObj, groups){
+        if(!stObj.tier) return null;
+        const grp = groups.find(function(g){ return g.g === stObj.group; });
+        const t = grp ? grp.tiers.find(function(x){ return x[1] === stObj.tier; }) : null;
+        if(!t) return stObj.group+' \u2014 '+stObj.tier;
+        const codeType = t[6] || 'ABT';
+        const altCodeType = t[7] || 'Benefit';
+        let s = stObj.group+' \u2014 '+codeType+': '+t[1];
+        if(t[4]) s += '  |  '+altCodeType+': '+t[4];
+        if(t[3]) s += '  ('+t[3]+')';
+        return s;
+      }
+      items.push({k:'Health plan', v: cascadeSummary(state.health, HEALTH_GROUPS) || 'None elected'});
+      items.push({k:'Dental plan', v: cascadeSummary(state.dental, DENTAL_GROUPS) || 'None elected'});
       items.push({k:'Vision plan', v: state.vision.tier ? ('MetLife Vision \u2014 '+state.vision.tier) : 'None elected'});
       function pickLabels(groups, arr){
         const out = [];
@@ -2110,7 +2260,10 @@ function renderReview(){
   const missing = [];
   sections.forEach(function(s, si){ s.items.forEach(function(it){ if(it.missing) missing.push({sec:si, label:it.k}); }); });
   let html = '<div class="section-card"><h2>Review &amp; Submit</h2>';
-  html += '<div class="section-desc">Check everything below, then send it to Payroll. You can jump back to any section to fix something.</div>';
+  html += '<div class="section-desc">Check everything below. Export or submit as many times as you need \u2014 nothing here is cleared until you click \u201cClear form.\u201d</div>';
+  if(state.submitted){
+    html += '<div class="sum-indicator ok" style="display:inline-block; margin-bottom:14px;">\u2713 Already finished \u2014 you can keep exporting or downloading copies anytime.</div>';
+  }
   if(missing.length){
     html += '<div class="missing-banner"><b>'+missing.length+' required item'+(missing.length>1?'s':'')+' still needed:</b><ul>' +
       missing.map(function(m){ return '<li><a href="#" data-jump="'+m.sec+'">'+esc(SECTIONS[m.sec].title)+'</a> \u2014 '+esc(m.label)+'</li>'; }).join('') +
@@ -2130,8 +2283,13 @@ function renderReview(){
       '<button class="btn" id="btnDownloadSummary">\u2b07 Download as text</button>' +
       '<button class="btn" id="btnCopySummary">\u2398 Copy summary</button>' +
       '<button class="btn" id="btnExportPDF">\uD83D\uDDA8\uFE0F Export as PDF</button>' +
-      '<button class="btn btn-brass" id="btnSubmitToPayroll" '+(missing.length?'disabled':'')+'>Finish for Payroll \u2192</button>' +
+      (state.submitted
+        ? '<button class="btn btn-brass" id="btnSubmitToPayroll" disabled>\u2713 Finished for Payroll</button>'
+        : '<button class="btn btn-brass" id="btnSubmitToPayroll" '+(missing.length?'disabled':'')+'>Finish for Payroll \u2192</button>') +
     '</div>' +
+  '</div>';
+  html += '<div class="btnbar" style="margin-top:2px; justify-content:flex-end;">' +
+    '<button class="btn btn-danger-outline" id="btnClearForm">\uD83D\uDDD1 Clear form &amp; start new</button>' +
   '</div>';
   return html;
 }
@@ -2149,6 +2307,8 @@ function bindReview(container){
   if(pdfBtn) pdfBtn.addEventListener('click', exportPDF);
   const subBtn = document.getElementById('btnSubmitToPayroll');
   if(subBtn) subBtn.addEventListener('click', submitToPayroll);
+  const clearBtn = document.getElementById('btnClearForm');
+  if(clearBtn) clearBtn.addEventListener('click', confirmClearForm);
 }
 
 async function downloadSummary(){
@@ -2160,7 +2320,7 @@ async function downloadSummary(){
   a.href = url; a.download = filename;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  showToast('Summary downloaded.');
+  showToast('Summary downloaded. You can download again anytime.');
 }
 async function copySummary(){
   try{
@@ -2171,32 +2331,74 @@ async function copySummary(){
 
 /* =========================================================================
    SUBMISSION (standalone build \u2014 no shared queue; HR exports a PDF (or
-   downloads/copies a text summary) and sends it to Payroll directly.)
+   downloads/copies a text summary) and sends it to Payroll directly. Every
+   action here is safe to repeat \u2014 nothing is cleared until the person
+   explicitly clicks "Clear form & start new".)
    ========================================================================= */
 function submitToPayroll(){
+  if(state.submitted){ showToast('Already finished \u2014 Export/Download for another copy, or Clear form to start a new one.'); return; }
   state.submitted = true;
+  saveDraft();
   exportPDF();
-  showSubmittedScreen();
+  showToast('Ready for Payroll. This form stays filled in \u2014 export a copy anytime, or Clear form when you\u2019re ready for the next hire.');
+  renderCurrentSection();
 }
 
-function showSubmittedScreen(){
-  const main = document.getElementById('formMain');
-  main.innerHTML = '<div class="section-card" style="text-align:center; padding:50px 30px;">' +
-    '<div style="font-size:40px;">\u2705</div>' +
-    '<h2 style="margin-top:12px;">Ready for Payroll</h2>' +
-    '<p style="color:var(--muted); max-width:46ch; margin:10px auto 22px;">'+esc(fullName())+'\u2019s setup information is ready. Use the print dialog\u2019s \u201cSave as PDF\u201d to save it, then send it to Payroll however you normally would (email, shared drive, etc.).</p>' +
-    '<div class="btnbar" style="justify-content:center;">' +
-      '<button class="btn" id="btnExportPDF2">\uD83D\uDDA8\uFE0F Export as PDF</button>' +
-      '<button class="btn" id="btnDownloadSummary2">\u2b07 Download as text</button>' +
-      '<button class="btn" id="btnCopySummary2">\u2398 Copy summary</button>' +
-      '<button class="btn btn-primary" id="btnStartAnother">+ Start another submission</button>' +
-    '</div>' +
-  '</div>';
-  document.getElementById('btnExportPDF2').addEventListener('click', exportPDF);
-  document.getElementById('btnDownloadSummary2').addEventListener('click', downloadSummary);
-  document.getElementById('btnCopySummary2').addEventListener('click', copySummary);
-  document.getElementById('btnStartAnother').addEventListener('click', function(){ resetForm(); });
-  document.getElementById('sidenavList') && (document.getElementById('sidenavList').innerHTML = '');
+/* =========================================================================
+   DRAFT AUTOSAVE (localStorage) — protects against an accidental reload or
+   closed tab. Saved only on this device/browser; never sent anywhere.
+   ========================================================================= */
+const DRAFT_KEY = 'nehr_draft_v1';
+function snapshotState(){
+  return {
+    data: state.data, percentDist: state.percentDist, emergency: state.emergency,
+    vacation: state.vacation, health: state.health, dental: state.dental, vision: state.vision,
+    position: state.position, addPay: state.addPay, supplemental: state.supplemental,
+    fsa: state.fsa, defcomp: state.defcomp, deductions: state.deductions,
+    relationships: state.relationships, bank1: state.bank1, bank2: state.bank2,
+    currentSection: state.currentSection, savedAt: new Date().toISOString(),
+  };
+}
+function saveDraft(){
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(snapshotState())); }
+  catch(e){ /* storage unavailable/full — autosave is best-effort, fail silently */ }
+}
+function loadDraft(){
+  try{
+    const raw = localStorage.getItem(DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function clearDraft(){
+  try{ localStorage.removeItem(DRAFT_KEY); }catch(e){}
+}
+function draftHasContent(d){
+  if(!d || !d.data) return false;
+  return Object.keys(d.data).some(function(k){ return k !== 'state' && d.data[k]; });
+}
+function applyDraft(d){
+  state.data = d.data || { state:'CA' };
+  state.percentDist = d.percentDist || [{account:'',pct:''}];
+  state.emergency = d.emergency || { p_name:'', p_rel:'', p_phone:'', p_phone2:'', s_name:'', s_rel:'', s_phone:'', s_phone2:'' };
+  state.vacation = d.vacation || {group:'',tier:''};
+  state.health = d.health || {group:'',tier:''};
+  state.dental = d.dental || {group:'',tier:''};
+  state.vision = d.vision || {tier:''};
+  state.position = d.position || { chart:'', grade:'', title:'', step:'', hrs:0, rt:'' };
+  state.addPay = d.addPay || []; state.supplemental = d.supplemental || [];
+  state.fsa = d.fsa || []; state.defcomp = d.defcomp || []; state.deductions = d.deductions || [];
+  state.relationships = d.relationships || [{name:'',rel:'',dept:''}];
+  state.bank1 = d.bank1 || { bank:'', routing:'', account:'', type:'Checking', method:'full', amount:'' };
+  state.bank2 = d.bank2 || { bank:'', routing:'', account:'', type:'Checking', amount:'' };
+  state.currentSection = d.currentSection || 0;
+}
+
+function confirmClearForm(){
+  if(confirm('This clears everything you\u2019ve entered on this form and can\u2019t be undone. Start a brand new form?')){
+    clearDraft();
+    resetForm();
+    showToast('Form cleared.');
+  }
 }
 
 function resetForm(){
@@ -2210,11 +2412,12 @@ function resetForm(){
   state.bank1 = { bank:'', routing:'', account:'', type:'Checking', method:'full', amount:'' };
   state.bank2 = { bank:'', routing:'', account:'', type:'Checking', amount:'' };
   state.currentSection = 0; state.submitted = false; state.invalidFields = {};
+  clearDraft();
   renderFormView();
 }
 
 /* =========================================================================
-   BOOTSTRAP
+   TABS + BOOTSTRAP
    ========================================================================= */
 function renderFormView(){
   const container = document.getElementById('formView');
@@ -2224,6 +2427,24 @@ function renderFormView(){
   '</div>';
   renderCurrentSection();
 }
+
+/* Restore a saved draft (if any) before the first render, then autosave
+   periodically and on tab close so an accidental reload can't wipe the form. */
+(function initDraft(){
+  const draft = loadDraft();
+  if(draftHasContent(draft)){
+    applyDraft(draft);
+    const banner = document.getElementById('draftBanner');
+    banner.classList.add('show');
+    document.getElementById('draftKeepBtn').addEventListener('click', function(){ banner.classList.remove('show'); });
+    document.getElementById('draftClearBtn').addEventListener('click', function(){
+      banner.classList.remove('show');
+      confirmClearForm();
+    });
+  }
+})();
+setInterval(saveDraft, 4000);
+window.addEventListener('beforeunload', saveDraft);
 
 renderFormView();
 </script>
