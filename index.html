@@ -139,9 +139,16 @@
 
   /* checkbox groups */
   .check-groups{display:flex; flex-direction:column; gap:14px;}
-  .check-group-title{font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:6px;}
-  .check-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:6px 16px;}
-  .checkitem{display:flex; align-items:flex-start; gap:8px; font-size:13.5px; padding:4px 0;}
+  .check-group-title{font-size:12.5px; font-weight:700; color:var(--ink); margin-bottom:6px; display:flex; align-items:center; gap:8px;}
+  .check-count{font-size:10.5px; font-weight:700; color:#fff; background:var(--brass); border-radius:20px; padding:1px 8px; display:none; letter-spacing:.01em;}
+  .check-count.show{display:inline-block;}
+  .check-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:4px 16px;}
+  .checkitem{display:flex; align-items:flex-start; gap:8px; font-size:13.5px; padding:5px 7px; border-radius:7px; margin:0 -7px;}
+  .checkitem:hover{background:var(--paper);}
+  .checkitem.is-checked{background:var(--amber-bg);}
+  .checkitem.is-checked > span{font-weight:600; color:var(--ink);}
+  .code-pill{display:inline-block; font-family:ui-monospace,monospace; font-size:10.5px; color:var(--brass-dark); background:var(--card); border:1px solid var(--border-2); border-radius:5px; padding:0px 6px; margin-left:6px; white-space:nowrap; vertical-align:1px;}
+  .checkitem.is-checked .code-pill{background:#fff; border-color:#E3C58A;}
   .checkitem input{margin-top:3px; width:auto; flex:none;}
   .checkitem .flag{color:var(--brass-dark); font-weight:700;}
 
@@ -1528,14 +1535,15 @@ function bindAccrual(container){
    CUSTOM SECTION: Additional Pay & Benefits
    ========================================================================= */
 function renderCheckGroup(name, groups, selected){
-  return '<div class="check-groups">' + groups.map(function(grp){
-    return '<div>'+(grp.g?'<div class="check-group-title">'+esc(grp.g)+'</div>':'')+'<div class="check-grid">' +
+  return '<div class="check-groups">' + groups.map(function(grp, gi){
+    const count = grp.items.filter(function(it){ return selected.indexOf(it.v) > -1; }).length;
+    return '<div data-checkgrp="'+name+'-'+gi+'">'+(grp.g?'<div class="check-group-title">'+esc(grp.g)+' <span class="check-count'+(count>0?' show':'')+'" data-countfor="'+name+'-'+gi+'">'+count+' selected</span></div>':'')+'<div class="check-grid">' +
       grp.items.map(function(it){
         const code = fieldCode(it);
-        const checked = selected.indexOf(it.v) > -1 ? ' checked' : '';
+        const isChecked = selected.indexOf(it.v) > -1;
         const amt = it.amt != null ? ' \u2014 $'+it.amt.toFixed(2) : (it.pct != null ? ' \u2014 '+it.pct+'%' : '');
-        return '<label class="checkitem"><input type="checkbox" data-checkgroup="'+name+'" value="'+esc(it.v)+'"'+checked+'> ' +
-          '<span>'+esc(it.l)+' <span style="color:var(--muted); font-family:ui-monospace,monospace; font-size:12px;">('+esc(code)+esc(amt)+')</span>' +
+        return '<label class="checkitem'+(isChecked?' is-checked':'')+'"><input type="checkbox" data-checkgroup="'+name+'" data-grp="'+name+'-'+gi+'" value="'+esc(it.v)+'"'+(isChecked?' checked':'')+'> ' +
+          '<span>'+esc(it.l)+'<span class="code-pill">'+esc(code)+esc(amt)+'</span>' +
           (it.warn ? ' <span class="flag" title="'+esc(it.warn)+'">\u26A0\uFE0F</span>' : '') + '</span></label>';
       }).join('') + '</div></div>';
   }).join('') + '</div>';
@@ -1635,6 +1643,19 @@ function bindBenefits(container){
       const idx = arr.indexOf(v);
       if(node.checked && idx === -1) arr.push(v);
       if(!node.checked && idx > -1) arr.splice(idx,1);
+      // live-update styling without a full re-render, so focus/scroll stay put
+      const label = node.closest('.checkitem');
+      if(label) label.classList.toggle('is-checked', node.checked);
+      const grpKey = node.getAttribute('data-grp');
+      if(grpKey){
+        const grpWrap = container.querySelector('[data-checkgrp="'+grpKey+'"]');
+        const badge = container.querySelector('[data-countfor="'+grpKey+'"]');
+        if(grpWrap && badge){
+          const n = grpWrap.querySelectorAll('input[type=checkbox]:checked').length;
+          badge.textContent = n+' selected';
+          badge.classList.toggle('show', n>0);
+        }
+      }
     });
   });
   bindCascade(container, 'health', HEALTH_GROUPS, state.health, function(){ renderCurrentSection(); });
@@ -2172,9 +2193,16 @@ function buildSummarySections(){
       } else {
         items.push({k:'Employer Benefit Package', v:'', missing:false, header:true});
       }
-      const addPayLabels = [];
-      ADD_PAY_GROUPS.forEach(function(g){ g.items.forEach(function(it){ if(state.addPay.indexOf(it.v)>-1) addPayLabels.push(it.l+' ('+fieldCode(it)+')'); }); });
-      items.push({k:'Additional pay', v: addPayLabels.join('; ') || 'None'});
+      // Pushes a clean header + one-row-per-item list for a checkbox picker,
+      // instead of cramming every selection into one semicolon-joined line.
+      function pushMultiSelect(label, groups, selectedArr){
+        const picked = [];
+        groups.forEach(function(g){ g.items.forEach(function(it){ if(selectedArr.indexOf(it.v)>-1) picked.push(it); }); });
+        if(!picked.length){ items.push({k:label, v:'None'}); return; }
+        items.push({k:label, v:'('+picked.length+' selected)', header:true});
+        picked.forEach(function(it){ items.push({k:'  '+it.l, v:fieldCode(it), sub:true}); });
+      }
+      pushMultiSelect('Additional Pay', ADD_PAY_GROUPS, state.addPay);
       function cascadeSummary(stObj, groups){
         if(!stObj.tier) return null;
         const grp = groups.find(function(g){ return g.g === stObj.group; });
@@ -2190,16 +2218,10 @@ function buildSummarySections(){
       items.push({k:'Health plan', v: cascadeSummary(state.health, HEALTH_GROUPS) || 'None elected'});
       items.push({k:'Dental plan', v: cascadeSummary(state.dental, DENTAL_GROUPS) || 'None elected'});
       items.push({k:'Vision plan', v: state.vision.tier ? ('MetLife Vision \u2014 '+state.vision.tier) : 'None elected'});
-      function pickLabels(groups, arr){
-        const out = [];
-        groups.forEach(function(g){ g.items.forEach(function(it){ if(arr.indexOf(it.v)>-1) out.push(it.l+' ('+fieldCode(it)+')'); }); });
-        return out.join('; ') || 'None';
-      }
-      items.push({k:'Supplemental insurance', v: pickLabels(SUPPLEMENTAL_GROUPS, state.supplemental)});
-      items.push({k:'Flexible spending account', v: pickLabels([FSA_GROUP], state.fsa)});
-      items.push({k:'Deferred compensation', v: pickLabels(DEFCOMP_GROUPS, state.defcomp)});
-      const dedLabels = CODES.deduction.filter(function(o){ return state.deductions.indexOf(o.v)>-1; }).map(function(o){ return o.l+' ('+o.v+')'; });
-      items.push({k:'Other deductions', v: dedLabels.join('; ') || 'None'});
+      pushMultiSelect('Supplemental Insurance', SUPPLEMENTAL_GROUPS, state.supplemental);
+      pushMultiSelect('Flexible Spending Account', [FSA_GROUP], state.fsa);
+      pushMultiSelect('Deferred Compensation', DEFCOMP_GROUPS, state.defcomp);
+      pushMultiSelect('Other Voluntary Deductions', [{g:'', items:CODES.deduction}], state.deductions);
     }
     if(sec.id === 'relationships'){
       const rows = state.relationships.filter(function(r){ return r.name; });
