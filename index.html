@@ -2583,7 +2583,7 @@ function changeSectionIsComplete(sec){
     if(changeState.groupChanging === 'no') return true;
     if(changeState.groupChanging !== 'yes') return false;
     return !!(d.groupPlan && d.retirementPlan && d.workersComp && d.eeoFunction && d.eeoCategory && d.sickLeave &&
-      changeState.vacation.tier && changeState.health.tier && changeState.dental.tier);
+      changeState.vacation.tier && changeMedicalComplete() && changeDentalComplete() && changeState.vision.tier);
   }
   if(sec.id === 'cnotes') return true;
   if(sec.id === 'coptional') return true;
@@ -2738,10 +2738,34 @@ function renderChangeClassification(){
 
   html += '<div class="subhead">New Health / Dental / Vision Elections</div>';
   html += '<div class="warnbox">\u26A0\uFE0F <span>Changing bargaining groups means prior medical/dental/vision elections must be turned off and new ones selected below.</span></div>';
-  html += '<div class="grid">' + renderCascade({id:'changeHealth', label:'New health plan election', required:true, groups:HEALTH_GROUPS, stateObj:changeState.health}) + '</div>';
-  html += '<div class="grid">' + renderCascade({id:'changeDental', label:'New dental plan election', required:true, groups:DENTAL_GROUPS, stateObj:changeState.dental}) + '</div>';
+  const mc = d.medChoice || '';
+  html += '<div class="grid"><div class="field"><label>Medical coverage <span class="req">*</span></label><select id="cf_medChoice" data-cfield="medChoice">' +
+    '<option value="">Select\u2026</option>' +
+    '<option value="plan"'+(mc==='plan'?' selected':'')+'>Enroll in a health plan</option>' +
+    '<option value="inlieu"'+(mc==='inlieu'?' selected':'')+'>Medical in Lieu (MD)</option>' +
+    '<option value="none"'+(mc==='none'?' selected':'')+'>Opt out \u2014 no medical coverage</option>' +
+  '</select></div></div>';
+  if(mc === 'plan'){
+    html += '<div class="grid">' + renderCascade({id:'changeHealth', label:'New health plan election', required:true, groups:HEALTH_GROUPS, stateObj:changeState.health}) + '</div>';
+  } else if(mc === 'inlieu'){
+    html += '<div class="grid"><div class="field"><label>Medical in Lieu amount <span class="req">*</span></label><input id="cf_medInLieuAmt" data-cfield="medInLieuAmt" inputmode="decimal" placeholder="$0.00" value="'+esc(d.medInLieuAmt||'')+'"><div class="hint">Additional pay code MD. Payroll should end any prior health plan election.</div></div></div>';
+  } else if(mc === 'none'){
+    html += '<div class="hint" style="margin:-4px 0 12px;">No medical coverage and no Medical in Lieu pay. Payroll should end any prior health plan election.</div>';
+  }
+  const dc = d.dentalChoice || '';
+  html += '<div class="grid"><div class="field"><label>Dental coverage <span class="req">*</span></label><select id="cf_dentalChoice" data-cfield="dentalChoice">' +
+    '<option value="">Select\u2026</option>' +
+    '<option value="plan"'+(dc==='plan'?' selected':'')+'>Enroll in a dental plan</option>' +
+    '<option value="waive"'+(dc==='waive'?' selected':'')+'>Waive dental coverage</option>' +
+  '</select></div></div>';
+  if(dc === 'plan'){
+    html += '<div class="grid">' + renderCascade({id:'changeDental', label:'New dental plan election', required:true, groups:DENTAL_GROUPS, stateObj:changeState.dental}) + '</div>';
+  } else if(dc === 'waive'){
+    html += '<div class="hint" style="margin:-4px 0 12px;">Dental waived. Payroll should end any prior dental election.</div>';
+  }
   const vt = VISION_PLAN.tiers.map(function(t){ return '<option value="'+t[1]+'"'+(changeState.vision.tier===t[1]?' selected':'')+'>'+esc(t[0])+' \u2014 '+esc(t[1])+' \u2014 $'+t[2].toFixed(2)+'</option>'; }).join('');
-  html += '<div class="grid"><div class="field"><label>New Vision Plan</label><select id="cf_vision"><option value="">Not enrolled\u2026</option>'+vt+'</select></div></div>';
+  html += '<div class="grid"><div class="field"><label>Vision coverage <span class="req">*</span></label><select id="cf_vision"><option value="">Select\u2026</option><option value="waived"'+(changeState.vision.tier==='waived'?' selected':'')+'>Waive vision coverage</option>'+vt+'</select>' +
+    (changeState.vision.tier==='waived' ? '<div class="hint">Vision waived. Payroll should end any prior vision election.</div>' : '') + '</div></div>';
 
   html += '<div class="subhead">New Leave Accrual Codes</div><div class="grid">';
   html += '<div class="field"><label>Comp Time Balance Code</label><select id="cf_compTime" data-cfield="compTime"><option value="">Select\u2026</option>'+CODES.compTime.map(function(o){return '<option value="'+o.v+'"'+(d.compTime===o.v?' selected':'')+'>'+esc(o.l)+'</option>';}).join('')+'</select></div>';
@@ -2751,6 +2775,17 @@ function renderChangeClassification(){
 
   return html;
 }
+function changeMedicalComplete(){
+  const d = changeState.data;
+  if(d.medChoice === 'plan') return !!changeState.health.tier;
+  if(d.medChoice === 'inlieu') return !!(d.medInLieuAmt && String(d.medInLieuAmt).trim());
+  return d.medChoice === 'none';
+}
+function changeDentalComplete(){
+  const dc = changeState.data.dentalChoice;
+  if(dc === 'plan') return !!changeState.dental.tier;
+  return dc === 'waive';
+}
 function bindChangeClassification(container){
   const gcSel = container.querySelector('#cf_groupChanging');
   if(gcSel) gcSel.addEventListener('change', function(){ changeState.groupChanging = gcSel.value; renderChangeSection(); });
@@ -2759,11 +2794,11 @@ function bindChangeClassification(container){
     const evt = node.tagName==='SELECT' ? 'change' : 'input';
     node.addEventListener(evt, function(){
       changeState.data[id] = node.value;
-      if(id === 'groupPlan') renderChangeSection(); // benefit package depends on this
+      if(id === 'groupPlan' || id === 'medChoice' || id === 'dentalChoice') renderChangeSection(); // dependent content
     });
   });
   const visionSel = container.querySelector('#cf_vision');
-  if(visionSel) visionSel.addEventListener('change', function(){ changeState.vision.tier = visionSel.value; });
+  if(visionSel) visionSel.addEventListener('change', function(){ changeState.vision.tier = visionSel.value; renderChangeSection(); });
   bindCascade(container, 'changeHealth', HEALTH_GROUPS, changeState.health, function(){ renderChangeSection(); });
   bindCascade(container, 'changeDental', DENTAL_GROUPS, changeState.dental, function(){ renderChangeSection(); });
   bindCascade(container, 'changeVacation', VACATION_GROUPS, changeState.vacation, function(){ renderChangeSection(); });
@@ -2909,14 +2944,24 @@ function buildChangeSummarySections(){
     const pkg = d.groupPlan ? GROUP_BENEFIT_PACKAGES[d.groupPlan] : null;
     classItems.push({k:'New Employer Benefit Package', v: pkg ? '('+pkg.items.length+' items)' : (d.groupPlan?'None on file':''), header:true});
     if(pkg) pkg.items.forEach(function(it){ classItems.push({k:'  '+it[0], v:it[1], sub:true}); });
+    if(d.medChoice === 'inlieu'){
+      const a = String(d.medInLieuAmt||'').trim();
+      classItems.push({k:'New Health Plan', v:'Medical in Lieu (MD)'+(a?' \u2014 Amount: '+(a.charAt(0)==='$'?a:'$'+a):' \u2014 Amount: (not provided)'), missing:!a});
+    } else if(d.medChoice === 'none'){
+      classItems.push({k:'New Health Plan', v:'Opted out \u2014 no medical coverage'});
+    } else if(d.medChoice !== 'plan'){
+      classItems.push({k:'New Health Plan', v:'', missing:true});
+    } else
     classItems.push({k:'New Health Plan', v: changeState.health.tier ? (function(){
       const g = HEALTH_GROUPS.find(function(x){ return x.g===changeState.health.group; });
       const t = g ? g.tiers.find(function(x){ return tierKey(x)===changeState.health.tier; }) : null;
       if(!t) return changeState.health.group+' \u2014 '+changeState.health.tier;
       return changeState.health.group+' \u2014 '+t[0]+' \u2014 ABT: '+tierCode(t)+(tierAltCode(t)?'  |  Benefit: '+tierAltCode(t):'');
     })() : '', missing:!changeState.health.tier});
-    classItems.push({k:'New Dental Plan', v: changeState.dental.tier ? (changeState.dental.group+' \u2014 '+changeState.dental.tier) : '', missing:!changeState.dental.tier});
-    classItems.push({k:'New Vision Plan', v: changeState.vision.tier ? ('MetLife Vision \u2014 '+changeState.vision.tier) : 'None elected'});
+    if(d.dentalChoice === 'waive') classItems.push({k:'New Dental Plan', v:'Waived'});
+    else if(d.dentalChoice !== 'plan') classItems.push({k:'New Dental Plan', v:'', missing:true});
+    else classItems.push({k:'New Dental Plan', v: changeState.dental.tier ? (changeState.dental.group+' \u2014 '+changeState.dental.tier) : '', missing:!changeState.dental.tier});
+    classItems.push({k:'New Vision Plan', v: changeState.vision.tier==='waived' ? 'Waived' : (changeState.vision.tier ? ('MetLife Vision \u2014 '+changeState.vision.tier) : ''), missing:!changeState.vision.tier});
     classItems.push({k:'Comp Time Code', v:(CODES.compTime.find(function(o){return o.v===d.compTime;})||{}).l||''});
     classItems.push({k:'Sick Leave Code', v:(CODES.sickLeave.find(function(o){return o.v===d.sickLeave;})||{}).l||'', missing:!d.sickLeave});
     classItems.push({k:'Vacation Code', v: changeState.vacation.tier ? (changeState.vacation.tier+' \u2014 '+changeState.vacation.group) : '', missing:!changeState.vacation.tier});
@@ -3110,6 +3155,8 @@ function applyChangeDraft(d){
   changeState.groupChanging = d.groupChanging || '';
   changeState.vacation = d.vacation || {group:'',tier:''};
   changeState.health = d.health || {group:'',tier:''};
+  if(changeState.data && !changeState.data.medChoice && changeState.health.tier) changeState.data.medChoice = 'plan';
+  if(changeState.data && !changeState.data.dentalChoice && d.dental && d.dental.tier) changeState.data.dentalChoice = 'plan';
   changeState.dental = d.dental || {group:'',tier:''};
   changeState.vision = d.vision || {tier:''};
   changeState.emergency = d.emergency || { p_name:'', p_rel:'', p_phone:'', p_phone2:'', s_name:'', s_rel:'', s_phone:'', s_phone2:'' };
