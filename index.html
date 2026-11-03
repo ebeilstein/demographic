@@ -1339,6 +1339,7 @@ const CHANGE_TYPES = [
   {v:'Reclassification', l:'Reclassification'},
   {v:'Demotion', l:'Demotion'},
   {v:'PT to FT', l:'Part-Time to Full-Time'},
+  {v:'FT to PT', l:'Full-Time to Part-Time'},
   {v:'Position Change', l:'Position Change (Lateral / Other)'},
 ];
 
@@ -1358,6 +1359,8 @@ const changeState = {
   updateEmergency: '',
   updateDemographic: '',
   notes: [{text:''}],   // {text} — included in the exported summary
+  updateDist: '',          // 'keep' | 'update' (forced to update for FT -> PT)
+  percentDist: [ {account:'', pct:''} ],
   currentSection: 0,
   invalidFields: {},
   submitted: false,
@@ -2577,13 +2580,13 @@ function changeSectionIsComplete(sec){
     return !!(d.employeeName && d.employeeId && d.effectiveDate && d.changeType && changeState.currentPosition.title && changeState.newPosition.title);
   }
   if(sec.id === 'cposition'){
-    return !!(changeState.newPosition.step && d.exemptOT && d.payFrequency && d.scheduledHours && d.newDeptAccount);
+    return !!(changeState.newPosition.step && d.exemptOT && d.payFrequency && d.scheduledHours && d.newDeptAccount) && changeDistComplete();
   }
   if(sec.id === 'cclass'){
     if(changeState.groupChanging === 'no') return true;
     if(changeState.groupChanging !== 'yes') return false;
     return !!(d.groupPlan && d.retirementPlan && d.workersComp && d.eeoFunction && d.eeoCategory && d.sickLeave &&
-      changeState.vacation.tier && changeMedicalComplete() && changeDentalComplete() && changeState.vision.tier);
+      changeState.vacation.tier && (isChangeToPT() || (changeMedicalComplete() && changeDentalComplete() && changeState.vision.tier)));
   }
   if(sec.id === 'cnotes') return true;
   if(sec.id === 'coptional') return true;
@@ -2591,6 +2594,18 @@ function changeSectionIsComplete(sec){
 }
 
 /* ---------- Section 1: Employee & Change Info ---------- */
+function isChangeToPT(){ return changeState.data.changeType === 'FT to PT'; }
+// Change types where a new expense distribution is always required.
+function distRequired(){ return isChangeToPT() || changeState.data.changeType === 'Reclassification'; }
+function changeNeedsDist(){ return distRequired() || changeState.updateDist === 'update'; }
+function changeDistTotal(){ return changeState.percentDist.reduce(function(s,r){ return s + (parseFloat(r.pct)||0); }, 0); }
+function changeDistComplete(){
+  if(!changeNeedsDist()) return changeState.updateDist === 'keep';
+  if(changeState.percentDist.some(function(r){ return !r.account || r.pct===''; })) return false;
+  return Math.abs(changeDistTotal()-100) < 0.01;
+}
+const PT_BENEFITS_MSG = 'Part-time employees aren\u2019t eligible for health benefits. Payroll should end all prior medical, dental and vision elections (and Medical in Lieu, if any) effective the date of this change.';
+
 function renderChangeInfo(){
   const d = changeState.data;
   let html = '<div class="grid">';
@@ -2599,6 +2614,15 @@ function renderChangeInfo(){
   html += '<div class="field"><label>Effective Date <span class="req">*</span></label><input type="date" id="cf_effectiveDate" data-cfield="effectiveDate" value="'+esc(d.effectiveDate||'')+'"></div>';
   html += '<div class="field"><label>Type of Change <span class="req">*</span></label><select id="cf_changeType" data-cfield="changeType"><option value="">Select\u2026</option>'+CHANGE_TYPES.map(function(t){return '<option value="'+t.v+'"'+(d.changeType===t.v?' selected':'')+'>'+esc(t.l)+'</option>';}).join('')+'</select></div>';
   html += '</div>';
+  if(isChangeToPT()){
+    html += '<div class="warnbox" style="margin-top:10px;">\u26A0\uFE0F <span>Moving to part-time: health benefits will be turned off, and you\u2019ll enter the new expense distribution on the next step.</span></div>';
+    if(changeState.newPosition.title && changeState.newPosition.chart === 'FT'){
+      html += '<div class="warnbox">\u26A0\uFE0F <span>The new position you picked is on the <b>Full-Time</b> salary chart. For a move to part-time, choose the position from the Part-Time chart.</span></div>';
+    }
+  }
+  if(changeState.data.changeType === 'Reclassification'){
+    html += '<div class="warnbox" style="margin-top:10px;">\u26A0\uFE0F <span>Reclassification: you\u2019ll enter the new expense distribution on the next step.</span></div>';
+  }
   html += '<div class="subhead">Position Change</div>';
   html += '<div class="grid">';
   html += '<div class="field span-2"><label>Current Position <span class="req">*</span></label>'+renderPlainPositionSelect('cf_currentPosition', changeState.currentPosition.title)+'</div>';
@@ -2619,7 +2643,7 @@ function bindChangeInfo(container){
   container.querySelectorAll('[data-cfield]').forEach(function(node){
     const id = node.getAttribute('data-cfield');
     const evt = node.tagName==='SELECT' ? 'change' : 'input';
-    node.addEventListener(evt, function(){ changeState.data[id] = node.value; });
+    node.addEventListener(evt, function(){ changeState.data[id] = node.value; if(id === 'changeType') renderChangeSection(); });
   });
   const curSel = container.querySelector('#cf_currentPosition');
   if(curSel) curSel.addEventListener('change', function(){
@@ -2686,9 +2710,55 @@ function renderChangePosition(){
   html += '<div class="field"><label>Scheduled Hours Code <span class="req">*</span></label><select id="cf_scheduledHours" data-cfield="scheduledHours"><option value="">Select\u2026</option>'+CODES.scheduledHours.map(function(o){return '<option value="'+o.v+'"'+(d.scheduledHours===o.v?' selected':'')+'>'+esc(o.l)+'</option>';}).join('')+'</select></div>';
   html += '<div class="field"><label>New Authorized Dept / Div / Account <span class="req">*</span></label><select id="cf_newDeptAccount" data-cfield="newDeptAccount"><option value="">Select\u2026</option>'+AUTH_DEPT_SIMPLE.map(function(o){return '<option value="'+o.v+'"'+(d.newDeptAccount===o.v?' selected':'')+'>'+esc(o.l)+'</option>';}).join('')+'</select></div>';
   html += '</div>';
+  html += renderChangeDist();
   return html;
 }
+function renderChangeDist(){
+  let html = '<div class="subhead">Percent / Expense Distribution</div>';
+  if(distRequired()){
+    html += '<div class="hint" style="margin-bottom:8px;">Required for '+(isChangeToPT()?'a move to part-time':'a reclassification')+' \u2014 enter the accounts this position will be charged to. Percentages should add to 100%.</div>';
+  } else {
+    html += '<div class="field" style="max-width:420px; margin-bottom:10px;"><label>Expense distribution <span class="req">*</span></label><select id="cf_updateDist">' +
+      '<option value="">Select\u2026</option>' +
+      '<option value="keep"'+(changeState.updateDist==='keep'?' selected':'')+'>Keep current distribution</option>' +
+      '<option value="update"'+(changeState.updateDist==='update'?' selected':'')+'>Update distribution</option>' +
+    '</select></div>';
+    if(changeState.updateDist !== 'update') return html;
+    html += '<div class="hint" style="margin-bottom:8px;">Split this position\u2019s cost across accounts. Percentages should add to 100%.</div>';
+  }
+  const rows = changeState.percentDist;
+  const total = changeDistTotal();
+  rows.forEach(function(r, i){
+    html += '<div class="repeat-row">' +
+      '<div class="field"><label style="'+(i>0?'opacity:0; height:0; margin:0;':'')+'">Account</label><select data-cpd="account" data-i="'+i+'"><option value="">Select account\u2026</option>'+DEPT_ACCOUNT_OPTGROUPS.map(function(g){return '<optgroup label="'+esc(g.label)+'">'+g.options.map(function(o){return '<option value="'+esc(o.value)+'"'+(r.account===o.value?' selected':'')+'>'+esc(o.label)+'</option>';}).join('')+'</optgroup>';}).join('')+'</select></div>' +
+      '<div class="field"><label style="'+(i>0?'opacity:0; height:0; margin:0;':'')+'">Percent</label><input data-cpd="pct" data-i="'+i+'" type="number" step="0.01" value="'+esc(r.pct)+'" placeholder="%"></div>' +
+      (rows.length>1 ? '<button type="button" class="rowbtn" data-cpdremove="'+i+'" title="Remove row">\u2715</button>' : '<div></div>') +
+    '</div>';
+  });
+  html += '<button type="button" class="addrow-btn" id="cpdAddRow">+ Add another account line</button>';
+  html += '<div id="cpdTotal" class="sum-indicator '+(Math.abs(total-100)<0.01?'ok':'bad')+'">Total: '+total.toFixed(2)+'%'+(Math.abs(total-100)<0.01?' \u2713':' \u2014 should equal 100%')+'</div>';
+  return html;
+}
+function bindChangeDist(container){
+  const sel = container.querySelector('#cf_updateDist');
+  if(sel) sel.addEventListener('change', function(){ changeState.updateDist = sel.value; renderChangeSection(); });
+  container.querySelectorAll('[data-cpd]').forEach(function(node){
+    node.addEventListener(node.tagName==='SELECT' ? 'change' : 'input', function(){
+      const i = parseInt(node.getAttribute('data-i'),10);
+      changeState.percentDist[i][node.getAttribute('data-cpd')] = node.value;
+      const total = changeDistTotal();
+      const ind = container.querySelector('#cpdTotal');
+      if(ind){ ind.textContent = 'Total: '+total.toFixed(2)+'%'+(Math.abs(total-100)<0.01?' \u2713':' \u2014 should equal 100%'); ind.className = 'sum-indicator '+(Math.abs(total-100)<0.01?'ok':'bad'); }
+    });
+  });
+  const addBtn = container.querySelector('#cpdAddRow');
+  if(addBtn) addBtn.addEventListener('click', function(){ changeState.percentDist.push({account:'',pct:''}); renderChangeSection(); });
+  container.querySelectorAll('[data-cpdremove]').forEach(function(btn){
+    btn.addEventListener('click', function(){ changeState.percentDist.splice(parseInt(btn.getAttribute('data-cpdremove'),10),1); renderChangeSection(); });
+  });
+}
 function bindChangePosition(container){
+  bindChangeDist(container);
   const stepSel = container.querySelector('#cf_newStep');
   if(stepSel) stepSel.addEventListener('change', function(){
     changeState.newPosition.step = stepSel.value;
@@ -2708,7 +2778,12 @@ function renderChangeClassification(){
   let html = '<div class="field" style="max-width:460px;"><label>Is this employee also changing Group / Bargaining Plan? <span class="req">*</span></label>' +
     '<select id="cf_groupChanging"><option value="">Select\u2026</option><option value="yes"'+(changeState.groupChanging==='yes'?' selected':'')+'>Yes \u2014 moving to a different group</option><option value="no"'+(changeState.groupChanging==='no'?' selected':'')+'>No \u2014 staying in the same group</option></select></div>';
   if(changeState.groupChanging === 'no'){
-    html += '<div class="hint" style="margin-top:12px;">Classification codes, benefit package, health/dental/vision elections, and leave accrual codes all stay as currently on file.</div>';
+    if(isChangeToPT()){
+      html += '<div class="hint" style="margin-top:12px;">Classification codes, benefit package, and leave accrual codes stay as currently on file.</div>';
+      html += '<div class="warnbox">\u26A0\uFE0F <span>'+PT_BENEFITS_MSG+'</span></div>';
+    } else {
+      html += '<div class="hint" style="margin-top:12px;">Classification codes, benefit package, health/dental/vision elections, and leave accrual codes all stay as currently on file.</div>';
+    }
     return html;
   }
   if(changeState.groupChanging !== 'yes') return html;
@@ -2737,6 +2812,9 @@ function renderChangeClassification(){
   }
 
   html += '<div class="subhead">New Health / Dental / Vision Elections</div>';
+  if(isChangeToPT()){
+    html += '<div class="warnbox">\u26A0\uFE0F <span>'+PT_BENEFITS_MSG+'</span></div>';
+  } else {
   html += '<div class="warnbox">\u26A0\uFE0F <span>Changing bargaining groups means prior medical/dental/vision elections must be turned off and new ones selected below.</span></div>';
   const mc = d.medChoice || '';
   html += '<div class="grid"><div class="field"><label>Medical coverage <span class="req">*</span></label><select id="cf_medChoice" data-cfield="medChoice">' +
@@ -2766,6 +2844,7 @@ function renderChangeClassification(){
   const vt = VISION_PLAN.tiers.map(function(t){ return '<option value="'+t[1]+'"'+(changeState.vision.tier===t[1]?' selected':'')+'>'+esc(t[0])+' \u2014 '+esc(t[1])+' \u2014 $'+t[2].toFixed(2)+'</option>'; }).join('');
   html += '<div class="grid"><div class="field"><label>Vision coverage <span class="req">*</span></label><select id="cf_vision"><option value="">Select\u2026</option><option value="waived"'+(changeState.vision.tier==='waived'?' selected':'')+'>Waive vision coverage</option>'+vt+'</select>' +
     (changeState.vision.tier==='waived' ? '<div class="hint">Vision waived. Payroll should end any prior vision election.</div>' : '') + '</div></div>';
+  }
 
   html += '<div class="subhead">New Leave Accrual Codes</div><div class="grid">';
   html += '<div class="field"><label>Comp Time Balance Code</label><select id="cf_compTime" data-cfield="compTime"><option value="">Select\u2026</option>'+CODES.compTime.map(function(o){return '<option value="'+o.v+'"'+(d.compTime===o.v?' selected':'')+'>'+esc(o.l)+'</option>';}).join('')+'</select></div>';
@@ -2931,6 +3010,21 @@ function buildChangeSummarySections(){
   posItems.push({k:'Pay Frequency', v: (CODES.payFrequency.find(function(o){return o.v===d.payFrequency;})||{}).l||'', missing:!d.payFrequency});
   posItems.push({k:'Scheduled Hours Code', v: (CODES.scheduledHours.find(function(o){return o.v===d.scheduledHours;})||{}).l||'', missing:!d.scheduledHours});
   posItems.push({k:'New Dept / Div / Account', v: (AUTH_DEPT_SIMPLE.find(function(o){return o.v===d.newDeptAccount;})||{}).l||'', missing:!d.newDeptAccount});
+  if(distRequired() || changeState.updateDist){
+    if(!distRequired() && changeState.updateDist === 'keep'){
+      posItems.push({k:'Expense Distribution', v:'Keep current distribution'});
+    } else {
+      const flatAcc = [].concat.apply([], DEPT_ACCOUNT_OPTGROUPS.map(function(g){return g.options;}));
+      const lines = changeState.percentDist.filter(function(r){ return r.account || r.pct; });
+      posItems.push({k:'New Expense Distribution', v: lines.length ? 'Total '+changeDistTotal().toFixed(2)+'%' : '', header:true, missing:!changeDistComplete()});
+      lines.forEach(function(r,i){
+        const hit = flatAcc.find(function(o){ return o.value===r.account; });
+        posItems.push({k:'  Line '+(i+1), v:(hit?hit.label:(r.account||'\u2014'))+' \u2014 '+(r.pct||'0')+'%', sub:true});
+      });
+    }
+  } else {
+    posItems.push({k:'Expense Distribution', v:'', missing:true});
+  }
   out.push({ title:'New Position & Pay', items: posItems });
 
   const classItems = [];
@@ -2944,6 +3038,11 @@ function buildChangeSummarySections(){
     const pkg = d.groupPlan ? GROUP_BENEFIT_PACKAGES[d.groupPlan] : null;
     classItems.push({k:'New Employer Benefit Package', v: pkg ? '('+pkg.items.length+' items)' : (d.groupPlan?'None on file':''), header:true});
     if(pkg) pkg.items.forEach(function(it){ classItems.push({k:'  '+it[0], v:it[1], sub:true}); });
+    if(isChangeToPT()){
+      classItems.push({k:'New Health Plan', v:'Not eligible (part-time) \u2014 end prior election'});
+      classItems.push({k:'New Dental Plan', v:'Not eligible (part-time) \u2014 end prior election'});
+      classItems.push({k:'New Vision Plan', v:'Not eligible (part-time) \u2014 end prior election'});
+    } else
     if(d.medChoice === 'inlieu'){
       const a = String(d.medInLieuAmt||'').trim();
       classItems.push({k:'New Health Plan', v:'Medical in Lieu (MD)'+(a?' \u2014 Amount: '+(a.charAt(0)==='$'?a:'$'+a):' \u2014 Amount: (not provided)'), missing:!a});
@@ -2958,13 +3057,17 @@ function buildChangeSummarySections(){
       if(!t) return changeState.health.group+' \u2014 '+changeState.health.tier;
       return changeState.health.group+' \u2014 '+t[0]+' \u2014 ABT: '+tierCode(t)+(tierAltCode(t)?'  |  Benefit: '+tierAltCode(t):'');
     })() : '', missing:!changeState.health.tier});
-    if(d.dentalChoice === 'waive') classItems.push({k:'New Dental Plan', v:'Waived'});
+    if(isChangeToPT()){ /* dental + vision covered above */ }
+    else if(d.dentalChoice === 'waive') classItems.push({k:'New Dental Plan', v:'Waived'});
     else if(d.dentalChoice !== 'plan') classItems.push({k:'New Dental Plan', v:'', missing:true});
     else classItems.push({k:'New Dental Plan', v: changeState.dental.tier ? (changeState.dental.group+' \u2014 '+changeState.dental.tier) : '', missing:!changeState.dental.tier});
-    classItems.push({k:'New Vision Plan', v: changeState.vision.tier==='waived' ? 'Waived' : (changeState.vision.tier ? ('MetLife Vision \u2014 '+changeState.vision.tier) : ''), missing:!changeState.vision.tier});
+    if(!isChangeToPT()) classItems.push({k:'New Vision Plan', v: changeState.vision.tier==='waived' ? 'Waived' : (changeState.vision.tier ? ('MetLife Vision \u2014 '+changeState.vision.tier) : ''), missing:!changeState.vision.tier});
     classItems.push({k:'Comp Time Code', v:(CODES.compTime.find(function(o){return o.v===d.compTime;})||{}).l||''});
     classItems.push({k:'Sick Leave Code', v:(CODES.sickLeave.find(function(o){return o.v===d.sickLeave;})||{}).l||'', missing:!d.sickLeave});
     classItems.push({k:'Vacation Code', v: changeState.vacation.tier ? (changeState.vacation.tier+' \u2014 '+changeState.vacation.group) : '', missing:!changeState.vacation.tier});
+  }
+  if(isChangeToPT() && changeState.groupChanging === 'no'){
+    classItems.push({k:'Health / Dental / Vision', v:'Not eligible (part-time) \u2014 end all prior elections'});
   }
   out.push({ title:'Classification & Benefits', items: classItems });
 
@@ -3137,7 +3240,8 @@ function snapshotChangeState(){
     dental: changeState.dental, vision: changeState.vision, emergency: changeState.emergency, bank1: changeState.bank1,
     updateDirectDeposit: changeState.updateDirectDeposit, updateTax: changeState.updateTax,
     updateEmergency: changeState.updateEmergency, updateDemographic: changeState.updateDemographic,
-    notes: changeState.notes, currentSection: changeState.currentSection, savedAt: new Date().toISOString(),
+    notes: changeState.notes, updateDist: changeState.updateDist, percentDist: changeState.percentDist,
+    currentSection: changeState.currentSection, savedAt: new Date().toISOString(),
   };
 }
 function saveChangeDraft(){
@@ -3166,6 +3270,8 @@ function applyChangeDraft(d){
   changeState.updateEmergency = d.updateEmergency || '';
   changeState.updateDemographic = d.updateDemographic || '';
   changeState.notes = (d.notes && d.notes.length) ? d.notes : [{text:''}];
+  changeState.updateDist = d.updateDist || '';
+  changeState.percentDist = (d.percentDist && d.percentDist.length) ? d.percentDist : [{account:'',pct:''}];
   changeState.currentSection = d.currentSection || 0;
 }
 function confirmClearChangeForm(){
@@ -3188,6 +3294,7 @@ function resetChangeForm(){
   changeState.bank1 = { bank:'', routing:'', account:'', type:'Checking' };
   changeState.updateDirectDeposit = ''; changeState.updateTax = ''; changeState.updateEmergency = ''; changeState.updateDemographic = '';
   changeState.notes = [{text:''}];
+  changeState.updateDist = ''; changeState.percentDist = [{account:'',pct:''}];
   changeState.currentSection = 0;
   changeState.submitted = false;
   changeState.invalidFields = {};
